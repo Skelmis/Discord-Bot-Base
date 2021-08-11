@@ -24,6 +24,7 @@ class BotBase(commands.Bot):
         except (AttributeError, PrefixNotFound):
             return commands.when_mentioned_or(self.DEFAULT_PREFIX)(self, message)
 
+    # TODO Add caching
     async def get_guild_prefix(self, guild_id: int = None) -> str:
         """
         Using a cached property fetch prefixes
