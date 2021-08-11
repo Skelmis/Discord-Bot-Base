@@ -27,6 +27,13 @@ class BotBase(commands.Bot):
     async def get_command_prefix(self, message):
         try:
             prefix = await self.get_guild_prefix(guild_id=message.guild.id)
+
+            if message.content.casefold().startswith(prefix.casefold()):
+                # The prefix matches, now return the one the user used
+                # such that dpy will dispatch the given command
+                prefix_length = len(prefix)
+                prefix = message.content[:prefix_length]
+
             return commands.when_mentioned_or(prefix)(self, message)
 
         except (AttributeError, PrefixNotFound):
