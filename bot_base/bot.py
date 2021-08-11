@@ -1,10 +1,12 @@
+import datetime
 import sys
 import traceback
-from typing import List
 
 import discord
+import humanize
 from discord.ext import commands
 
+from bot_base.blacklist import BlacklistManager
 from bot_base.db import MongoManager
 from bot_base.exceptions import PrefixNotFound
 
@@ -12,9 +14,15 @@ from bot_base.exceptions import PrefixNotFound
 class BotBase(commands.Bot):
     def __init__(self, *args, **kwargs):
         self.db = MongoManager(kwargs.pop("mongo_url"))
+        self.blacklist = BlacklistManager(self.db)
+        self.uptime = datetime.datetime.now(tz=datetime.timezone.utc)
+
         self.DEFAULT_PREFIX = kwargs.pop("default_prefix")
 
         super().__init__(*args, **kwargs)
+
+    def get_bot_uptime(self):
+        return humanize.precisedelta(self.uptime)
 
     async def get_command_prefix(self, message):
         try:
@@ -66,3 +74,27 @@ class BotBase(commands.Bot):
                 print(f"{original.__class__.__name__}: {original}", file=sys.stderr)
         elif isinstance(error, commands.ArgumentParsingError):
             await ctx.send(error)
+
+    async def on_guild_join(self, guild):
+        if guild.id in self.blacklist.guilds:
+            await guild.leave()
+
+    async def process_commands(self, message):
+        ctx = await self.get_context(message)
+
+        if ctx.command is None:
+            return
+
+        if ctx.author.id in self.blacklist.users:
+            return
+
+        if ctx.guild.id is not None and ctx.guild.id in self.blacklist.guilds:
+            return
+
+        await self.invoke(ctx)
+
+    async def on_message(self, message):
+        if message.author.bot:
+            return
+
+        await self.process_commands(message)
