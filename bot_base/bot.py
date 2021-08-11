@@ -105,3 +105,40 @@ class BotBase(commands.Bot):
             return
 
         await self.process_commands(message)
+
+    @staticmethod
+    async def get_or_fetch_member(guild, member_id):
+        """Looks up a member in cache or fetches if not found."""
+        member = guild.get_member(member_id)
+        if member is not None:
+            return member
+
+        member = await guild.fetch_member(member_id)
+        return member
+
+    async def get_or_fetch_channel(self, channel_id):
+        """Looks up a channel in cache or fetches if not found."""
+        channel = self.get_channel(channel_id)
+        if channel:
+            return channel
+
+        channel = await self.fetch_channel(channel_id)
+        return channel
+
+    async def get_or_fetch_guild(self, guild_id):
+        """Looks up a guild in cache or fetches if not found."""
+        guild = self.get_guild(guild_id)
+        if guild:
+            return guild
+
+        guild = await self.fetch_guild(guild_id)
+        return guild
+
+    async def get_or_fetch_user(self, user_id):
+        """Looks up a user in cache or fetches if not found."""
+        user = self.get_user(user_id)
+        if user:
+            return user
+
+        user = await self.fetch_user(user_id)
+        return user
