@@ -25,7 +25,9 @@ class BotBase(commands.Bot):
         super().__init__(*args, **kwargs)
 
     def get_bot_uptime(self):
-        return humanize.precisedelta(self.uptime)
+        return humanize.precisedelta(
+            self.uptime - datetime.datetime.now(tz=datetime.timezone.utc)
+        )
 
     async def get_command_prefix(self, message):
         try:
@@ -72,6 +74,8 @@ class BotBase(commands.Bot):
         return prefix
 
     async def on_command_error(self, ctx, error):
+        error = getattr(error, "original", error)
+
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send("This command cannot be used in private messages.")
         elif isinstance(error, commands.DisabledCommand):
