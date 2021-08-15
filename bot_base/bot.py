@@ -2,9 +2,11 @@ import datetime
 import sys
 import logging
 import traceback
+from typing import Union
 
 import discord
 import humanize
+from discord import abc
 from discord.ext import commands
 
 from bot_base.blacklist import BlacklistManager
@@ -16,11 +18,13 @@ log = logging.getLogger(__name__)
 
 class BotBase(commands.Bot):
     def __init__(self, *args, **kwargs):
-        self.db = MongoManager(kwargs.pop("mongo_url"))
+        self.db = MongoManager(
+            kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
+        )
         self.blacklist = BlacklistManager(self.db)
         self.uptime = datetime.datetime.now(tz=datetime.timezone.utc)
 
-        self.DEFAULT_PREFIX = kwargs.pop("default_prefix")
+        self.DEFAULT_PREFIX = kwargs.get("command_prefix")
 
         super().__init__(*args, **kwargs)
 
@@ -102,7 +106,7 @@ class BotBase(commands.Bot):
                 ctx.command.qualified_name, 1, "failure_count"
             )
 
-        log.debug(f"Command failed: `{ctx.command.qualified_name}`")
+        log.info(f"Command failed: `{ctx.command.qualified_name}`")
         raise error
 
     async def on_command_completion(self, ctx):
@@ -121,34 +125,38 @@ class BotBase(commands.Bot):
             await self.db.command_usage.increment(
                 ctx.command.qualified_name, 1, "usage_count"
             )
-        log.debug(f"Command executed: `{ctx.command.qualified_name}`")
+        log.info(f"Command executed: `{ctx.command.qualified_name}`")
 
-    async def on_guild_join(self, guild):
+    async def on_guild_join(self, guild: discord.Guild):
         if guild.id in self.blacklist.guilds:
             await guild.leave()
 
-    async def process_commands(self, message):
+    async def process_commands(self, message: discord.Message):
         ctx = await self.get_context(message)
 
         if ctx.command is None:
             return
 
         if ctx.author.id in self.blacklist.users:
+            log.debug(f"Ignoring blacklisted user: {ctx.author.id}")
             return
 
         if ctx.guild.id is not None and ctx.guild.id in self.blacklist.guilds:
+            log.debug(f"Ignoring blacklisted guild: {ctx.guild.id}")
             return
 
         await self.invoke(ctx)
 
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         if message.author.bot:
             return
 
         await self.process_commands(message)
 
     @staticmethod
-    async def get_or_fetch_member(guild, member_id):
+    async def get_or_fetch_member(
+        guild: discord.Guild, member_id: int
+    ) -> discord.Member:
         """Looks up a member in cache or fetches if not found."""
         member = guild.get_member(member_id)
         if member is not None:
@@ -157,7 +165,9 @@ class BotBase(commands.Bot):
         member = await guild.fetch_member(member_id)
         return member
 
-    async def get_or_fetch_channel(self, channel_id):
+    async def get_or_fetch_channel(
+        self, channel_id: int
+    ) -> Union[abc.GuildChannel, abc.PrivateChannel]:
         """Looks up a channel in cache or fetches if not found."""
         channel = self.get_channel(channel_id)
         if channel:
@@ -166,7 +176,7 @@ class BotBase(commands.Bot):
         channel = await self.fetch_channel(channel_id)
         return channel
 
-    async def get_or_fetch_guild(self, guild_id):
+    async def get_or_fetch_guild(self, guild_id: int) -> discord.Guild:
         """Looks up a guild in cache or fetches if not found."""
         guild = self.get_guild(guild_id)
         if guild:
@@ -175,7 +185,7 @@ class BotBase(commands.Bot):
         guild = await self.fetch_guild(guild_id)
         return guild
 
-    async def get_or_fetch_user(self, user_id):
+    async def get_or_fetch_user(self, user_id: int) -> discord.User:
         """Looks up a user in cache or fetches if not found."""
         user = self.get_user(user_id)
         if user:
