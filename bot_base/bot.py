@@ -1,5 +1,6 @@
 import datetime
 import sys
+import logging
 import traceback
 
 import discord
@@ -9,6 +10,8 @@ from discord.ext import commands
 from bot_base.blacklist import BlacklistManager
 from bot_base.db import MongoManager
 from bot_base.exceptions import PrefixNotFound
+
+log = logging.getLogger(__name__)
 
 
 class BotBase(commands.Bot):
@@ -81,6 +84,40 @@ class BotBase(commands.Bot):
                 print(f"{original.__class__.__name__}: {original}", file=sys.stderr)
         elif isinstance(error, commands.ArgumentParsingError):
             await ctx.send(error)
+
+        if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+            await self.db.command_usage.upsert(
+                {
+                    "_id": ctx.command.qualified_name,
+                    "usage_count": 0,
+                    "failure_count": 1,
+                }
+            )
+        else:
+            await self.db.command_usage.increment(
+                ctx.command.qualified_name, 1, "failure_count"
+            )
+
+        log.debug(f"Command failed: `{ctx.command.qualified_name}`")
+        raise error
+
+    async def on_command_completion(self, ctx):
+        if ctx.command.qualified_name == "logout":
+            return
+
+        if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+            await self.db.command_usage.upsert(
+                {
+                    "_id": ctx.command.qualified_name,
+                    "usage_count": 1,
+                    "failure_count": 0,
+                }
+            )
+        else:
+            await self.db.command_usage.increment(
+                ctx.command.qualified_name, 1, "usage_count"
+            )
+        log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
     async def on_guild_join(self, guild):
         if guild.id in self.blacklist.guilds:
