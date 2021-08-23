@@ -70,8 +70,12 @@ class BotBase(commands.Bot):
             We failed to find and
             return a valid prefix
         """
-        prefix = self.db.config.find(guild_id)
+        prefix_data = self.db.config.find(guild_id)
 
+        if not prefix_data:
+            raise PrefixNotFound
+
+        prefix = prefix_data.get("prefix")
         if not prefix:
             raise PrefixNotFound
 
