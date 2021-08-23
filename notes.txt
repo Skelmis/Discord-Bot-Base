@@ -3,3 +3,4 @@ depends on
 dnspython
 discord.py
 motor
+humanize
