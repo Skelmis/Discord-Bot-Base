@@ -92,6 +92,10 @@ class BotBase(commands.Bot):
                 print(f"{original.__class__.__name__}: {original}", file=sys.stderr)
         elif isinstance(error, commands.ArgumentParsingError):
             await ctx.send(error)
+        elif isinstance(error, commands.PrivateMessageOnly):
+            await ctx.send("This command can only be used in dm's.")
+        elif isinstance(error, commands.NoPrivateMessage):
+            await ctx.send("This command can only be used in Guilds.")
 
         if await self.db.command_usage.find(ctx.command.qualified_name) is None:
             await self.db.command_usage.upsert(
