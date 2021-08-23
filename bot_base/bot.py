@@ -106,7 +106,7 @@ class BotBase(commands.Bot):
                 ctx.command.qualified_name, 1, "failure_count"
             )
 
-        log.info(f"Command failed: `{ctx.command.qualified_name}`")
+        log.debug(f"Command failed: `{ctx.command.qualified_name}`")
         raise error
 
     async def on_command_completion(self, ctx):
@@ -125,7 +125,7 @@ class BotBase(commands.Bot):
             await self.db.command_usage.increment(
                 ctx.command.qualified_name, 1, "usage_count"
             )
-        log.info(f"Command executed: `{ctx.command.qualified_name}`")
+        log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
     async def on_guild_join(self, guild: discord.Guild):
         if guild.id in self.blacklist.guilds:
