@@ -10,6 +10,7 @@ from discord import abc
 from discord.ext import commands
 
 from bot_base.blacklist import BlacklistManager
+from bot_base.context import BotContext
 from bot_base.db import MongoManager
 from bot_base.exceptions import PrefixNotFound
 
@@ -140,7 +141,7 @@ class BotBase(commands.Bot):
             await guild.leave()
 
     async def process_commands(self, message: discord.Message):
-        ctx = await self.get_context(message)
+        ctx = await self.get_context(message, cls=BotContext)
 
         if ctx.command is None:
             return

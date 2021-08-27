@@ -7,7 +7,7 @@ bot = BotBase(
     command_prefix="!", mongo_url=os.environ["MONGO_URL"], mongo_database_name="my_bot"
 )
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 @bot.event
@@ -17,7 +17,7 @@ async def on_ready():
 
 @bot.command()
 async def test(ctx):
-    await ctx.send("hi!")
+    await ctx.send_basic_embed("hi!")
 
 
 bot.run(os.environ["TOKEN"])
