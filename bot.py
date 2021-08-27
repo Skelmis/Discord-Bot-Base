@@ -17,7 +17,7 @@ async def on_ready():
 
 @bot.command()
 async def test(ctx):
-    await ctx.send_basic_embed("hi!")
+    await ctx.channel.send_basic_embed(f"I am a custom method mwahahaah!")
 
 
 bot.run(os.environ["TOKEN"])

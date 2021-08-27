@@ -12,9 +12,6 @@ class MongoManager:
 
     def __getattr__(self, item) -> Document:
         """
-        Lru cache this to save lookup calls
-        on documents
-
         Parameters
         ----------
         item : str

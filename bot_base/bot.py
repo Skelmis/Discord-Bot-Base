@@ -13,6 +13,7 @@ from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
 from bot_base.db import MongoManager
 from bot_base.exceptions import PrefixNotFound
+from bot_base.wraps import WrappedChannel, WrappedPerson
 
 log = logging.getLogger(__name__)
 
@@ -165,25 +166,23 @@ class BotBase(commands.Bot):
     @staticmethod
     async def get_or_fetch_member(
         guild: discord.Guild, member_id: int
-    ) -> discord.Member:
+    ) -> WrappedPerson:
         """Looks up a member in cache or fetches if not found."""
         member = guild.get_member(member_id)
         if member is not None:
             return member
 
         member = await guild.fetch_member(member_id)
-        return member
+        return WrappedPerson(member)
 
-    async def get_or_fetch_channel(
-        self, channel_id: int
-    ) -> Union[abc.GuildChannel, abc.PrivateChannel]:
+    async def get_or_fetch_channel(self, channel_id: int) -> WrappedChannel:
         """Looks up a channel in cache or fetches if not found."""
         channel = self.get_channel(channel_id)
         if channel:
             return channel
 
         channel = await self.fetch_channel(channel_id)
-        return channel
+        return WrappedChannel(channel)
 
     async def get_or_fetch_guild(self, guild_id: int) -> discord.Guild:
         """Looks up a guild in cache or fetches if not found."""
@@ -194,11 +193,11 @@ class BotBase(commands.Bot):
         guild = await self.fetch_guild(guild_id)
         return guild
 
-    async def get_or_fetch_user(self, user_id: int) -> discord.User:
+    async def get_or_fetch_user(self, user_id: int) -> WrappedPerson:
         """Looks up a user in cache or fetches if not found."""
         user = self.get_user(user_id)
         if user:
             return user
 
         user = await self.fetch_user(user_id)
-        return user
+        return WrappedPerson(user)

@@ -1,7 +1,7 @@
 import discord
 
+from . import channel
 
-from .channel import WrappedChannel
 
 # noinspection PyUnresolvedReferences
 class Meta:
@@ -47,7 +47,7 @@ class Meta:
         try:
             author_id = author_id or self.author.id
         except AttributeError:
-            if issubclass(type(self), WrappedChannel):
+            if issubclass(type(self), channel.WrappedChannel):
                 raise RuntimeError(
                     "Expected author_id when using prompt on a TextChannel"
                 )
@@ -97,10 +97,10 @@ class Meta:
         if color:
             embed.colour = color
 
-        if contain_timestamp:
+        if contain_timestamp and not isinstance(self, channel.WrappedChannel):
             embed.timestamp = self.message.created_at
 
-        if include_command_invoker:
+        if include_command_invoker and not isinstance(self, channel.WrappedChannel):
             embed.set_footer(
                 text=self.author.display_name, icon_url=self.author.avatar_url
             )
