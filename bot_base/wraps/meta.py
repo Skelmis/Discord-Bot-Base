@@ -106,3 +106,45 @@ class Meta:
             )
 
         return await target.send(embed=embed)
+
+    async def get_input(
+        self,
+        contentOne: int = "Please enter your desired input",
+        contentTwo: int = "\uFEFF",
+        *,
+        timeout: int = 100,
+        delete_after: bool = True,
+        author_id=None,
+    ) -> Optional[str]:
+        embed = discord.Embed(
+            title=f"{contentOne}",
+            description=f"{contentTwo}",
+        )
+        sent = await self.send(embed=embed)
+        val = None
+
+        try:
+            author_id = author_id or self.author.id
+        except AttributeError:
+            if issubclass(type(self), channel.WrappedChannel):
+                raise RuntimeError(
+                    "Expected author_id when using prompt on a TextChannel"
+                )
+
+        try:
+            msg = await self.bot.wait_for(
+                "message",
+                timeout=timeout,
+                check=lambda message: message.author.id == author_id,
+            )
+            if msg:
+                val = msg.content
+        except asyncio.TimeoutError:
+            return val
+
+        try:
+            if delete_after:
+                await sent.delete()
+                await msg.delete()
+        finally:
+            return val
