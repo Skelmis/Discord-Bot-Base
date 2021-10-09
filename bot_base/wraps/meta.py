@@ -47,7 +47,9 @@ class Meta:
 
         # Ensure we can gather author id
         try:
-            author_id = author_id or self.author.id
+            author_id = (
+                author_id or self.author.id or self.id
+            )  # self.id for User/Member
         except AttributeError:
             if issubclass(type(self), channel.WrappedChannel):
                 raise RuntimeError(
@@ -126,7 +128,9 @@ class Meta:
         val = None
 
         try:
-            author_id = author_id or self.author.id
+            author_id = (
+                author_id or self.author.id or self.id
+            )  # or self.id for User/Member
         except AttributeError:
             if issubclass(type(self), channel.WrappedChannel):
                 raise RuntimeError(

@@ -27,4 +27,9 @@ async def echo(ctx):
     await ctx.send(text)
 
 
+@bot.command()
+async def ping(ctx):
+    await ctx.send_basic_embed("Pong!")
+
+
 bot.run(os.environ["TOKEN"])

@@ -8,6 +8,8 @@ Features
 ---
 
 - Built in persistent blacklist system for both Guilds and Users
+The bot leaves blacklisted guilds on join and doesn't process
+commands for anything blacklisted.
 ```python
 import os
 from bot_base import BotBase
@@ -110,3 +112,16 @@ async def echo(ctx):
 
     await ctx.send(text)
 ```
+  - Both `ctx.author` and `ctx.channel` also include these methods. 
+    However they do lack some things. (See below)
+
+
+
+
+- User / Member's 
+These classes work the same as calling directly on `ctx`
+
+- Channel Methods
+Channels feature all the above methods with the following constraints:
+    - Both `prompt` and `get_input` require `author_id` for checks
+    - `send_basic_embed` will not set footers or timestamps

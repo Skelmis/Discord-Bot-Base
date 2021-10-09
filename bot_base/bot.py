@@ -162,14 +162,6 @@ class BotBase(commands.Bot):
         if message.author.bot:
             return
 
-        if message.content == "noice":
-            await message.channel.send(
-                embed=nextcord.Embed(
-                    title="Uh oh!",
-                    description="Discord.py is no longer under active development and is all finished.",
-                )
-            )
-
         await self.process_commands(message)
 
     @staticmethod

@@ -9,8 +9,8 @@ class WrappedPerson(Meta):
     """Wraps nextcord.Member, nextcord.User for ease of stuff"""
 
     def __init__(self, channel: Union[nextcord.User, nextcord.Member]):
-        self.channel = channel
+        self.person = channel
 
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from author itself"""
-        return getattr(self.channel, item)
+        return getattr(self.person, item)
