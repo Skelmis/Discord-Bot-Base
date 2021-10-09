@@ -116,6 +116,9 @@ async def echo(ctx):
     However they do lack some things. (See below)
 
 
+- The bot features many convenience methods. 
+  The following methods exist in order to *always* get
+  the given object or error trying.
 
 
 - User / Member's 

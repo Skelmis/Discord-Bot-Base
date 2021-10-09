@@ -171,7 +171,7 @@ class BotBase(commands.Bot):
         """Looks up a member in cache or fetches if not found."""
         member = guild.get_member(member_id)
         if member is not None:
-            return member
+            return WrappedPerson(member)
 
         member = await guild.fetch_member(member_id)
         return WrappedPerson(member)
@@ -180,7 +180,7 @@ class BotBase(commands.Bot):
         """Looks up a channel in cache or fetches if not found."""
         channel = self.get_channel(channel_id)
         if channel:
-            return channel
+            return WrappedChannel(channel)
 
         channel = await self.fetch_channel(channel_id)
         return WrappedChannel(channel)
@@ -198,7 +198,7 @@ class BotBase(commands.Bot):
         """Looks up a user in cache or fetches if not found."""
         user = self.get_user(user_id)
         if user:
-            return user
+            return WrappedPerson(user)
 
         user = await self.fetch_user(user_id)
         return WrappedPerson(user)
