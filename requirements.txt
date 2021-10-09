@@ -1,0 +1,4 @@
+dnspython
+motor
+humanize
+nextcord
