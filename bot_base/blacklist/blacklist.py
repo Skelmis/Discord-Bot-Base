@@ -20,6 +20,19 @@ class BlacklistManager:
 
         return in_users or in_guilds
 
+    async def initialize(self) -> None:
+        """
+        Called sometime on creation in order to
+        populate the internal blacklist.
+        """
+        all_guild_entries = await self.db.guild_blacklist.get_all()
+        for guild in all_guild_entries:
+            self.guilds.add(guild["_id"])
+
+        all_user_entries = await self.db.user_blacklist.get_all()
+        for user in all_user_entries:
+            self.users.add(user["_id"])
+
     async def add_to_blacklist(
         self, item: int, reason: str = "Unknown", is_guild_blacklist: bool = True
     ) -> None:

@@ -33,6 +33,9 @@ class BotBase(commands.Bot):
             self.uptime - datetime.datetime.now(tz=datetime.timezone.utc)
         )
 
+    async def on_ready(self):
+        await self.blacklist.initialize()
+
     async def get_command_prefix(self, message):
         try:
             prefix = await self.get_guild_prefix(guild_id=message.guild.id)
