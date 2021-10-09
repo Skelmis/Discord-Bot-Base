@@ -104,7 +104,7 @@ class Meta:
 
         if include_command_invoker and not isinstance(self, channel.WrappedChannel):
             embed.set_footer(
-                text=self.author.display_name, icon_url=self.author.avatar_url
+                text=self.author.display_name, icon_url=self.author.avatar.url
             )
 
         return await target.send(embed=embed)
