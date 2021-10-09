@@ -160,4 +160,7 @@ if isinstance(member.person, nextcord.Member):
 channel = await bot.get_or_fetch_channel(45678)
 if isinstance(channel.channel, nextcord.TextChannel):
     print("This channel is a TextChannel")
+    
+# All objects also have there regular attributes attached
+print(f"Woah, thats {member.display_name}!")
 ```
