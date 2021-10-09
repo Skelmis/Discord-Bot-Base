@@ -2,12 +2,10 @@ import datetime
 import sys
 import logging
 import traceback
-from typing import Union
 
-import discord
+import nextcord
 import humanize
-from discord import abc
-from discord.ext import commands
+from nextcord.ext import commands
 
 from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
@@ -92,7 +90,7 @@ class BotBase(commands.Bot):
             await ctx.author.send("Sorry. This command is disabled and cannot be used.")
         elif isinstance(error, commands.CommandInvokeError):
             original = error.original
-            if not isinstance(original, discord.HTTPException):
+            if not isinstance(original, nextcord.HTTPException):
                 print(f"In {ctx.command.qualified_name}:", file=sys.stderr)
                 traceback.print_tb(original.__traceback__)
                 print(f"{original.__class__.__name__}: {original}", file=sys.stderr)
@@ -137,11 +135,11 @@ class BotBase(commands.Bot):
             )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
-    async def on_guild_join(self, guild: discord.Guild):
+    async def on_guild_join(self, guild: nextcord.Guild):
         if guild.id in self.blacklist.guilds:
             await guild.leave()
 
-    async def process_commands(self, message: discord.Message):
+    async def process_commands(self, message: nextcord.Message):
         ctx = await self.get_context(message, cls=BotContext)
 
         if ctx.command is None:
@@ -157,13 +155,13 @@ class BotBase(commands.Bot):
 
         await self.invoke(ctx)
 
-    async def on_message(self, message: discord.Message):
+    async def on_message(self, message: nextcord.Message):
         if message.author.bot:
             return
 
         if message.content == "noice":
             await message.channel.send(
-                embed=discord.Embed(
+                embed=nextcord.Embed(
                     title="Uh oh!",
                     description="Discord.py is no longer under active development and is all finished.",
                 )
@@ -173,7 +171,7 @@ class BotBase(commands.Bot):
 
     @staticmethod
     async def get_or_fetch_member(
-        guild: discord.Guild, member_id: int
+        guild: nextcord.Guild, member_id: int
     ) -> WrappedPerson:
         """Looks up a member in cache or fetches if not found."""
         member = guild.get_member(member_id)
@@ -192,7 +190,7 @@ class BotBase(commands.Bot):
         channel = await self.fetch_channel(channel_id)
         return WrappedChannel(channel)
 
-    async def get_or_fetch_guild(self, guild_id: int) -> discord.Guild:
+    async def get_or_fetch_guild(self, guild_id: int) -> nextcord.Guild:
         """Looks up a guild in cache or fetches if not found."""
         guild = self.get_guild(guild_id)
         if guild:

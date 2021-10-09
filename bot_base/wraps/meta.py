@@ -1,6 +1,6 @@
 from typing import Optional
 
-import discord
+import nextcord
 
 from . import channel
 
@@ -94,7 +94,7 @@ class Meta:
         """Wraps a string to send formatted as an embed"""
         target = target or self.channel
 
-        embed = discord.Embed(description=desc)
+        embed = nextcord.Embed(description=desc)
 
         if color:
             embed.colour = color
@@ -118,7 +118,7 @@ class Meta:
         delete_after: bool = True,
         author_id=None,
     ) -> Optional[str]:
-        embed = discord.Embed(
+        embed = nextcord.Embed(
             title=f"{contentOne}",
             description=f"{contentTwo}",
         )

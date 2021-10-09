@@ -1,14 +1,14 @@
 from typing import Union
 
-import discord
+import nextcord
 
 from bot_base.wraps.meta import Meta
 
 
 class WrappedPerson(Meta):
-    """Wraps discord.Member, discord.User for ease of stuff"""
+    """Wraps nextcord.Member, nextcord.User for ease of stuff"""
 
-    def __init__(self, channel: Union[discord.User, discord.Member]):
+    def __init__(self, channel: Union[nextcord.User, nextcord.Member]):
         self.channel = channel
 
     def __getattr__(self, item):

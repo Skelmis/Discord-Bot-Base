@@ -1,4 +1,4 @@
-from discord import DiscordException
+from nextcord import DiscordException
 
 
 class PrefixNotFound(DiscordException):
