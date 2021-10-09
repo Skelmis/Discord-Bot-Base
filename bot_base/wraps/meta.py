@@ -142,6 +142,9 @@ class Meta:
             if msg:
                 val = msg.content
         except asyncio.TimeoutError:
+            if delete_after:
+                await sent.delete()
+
             return val
 
         try:
