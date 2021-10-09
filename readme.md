@@ -113,18 +113,51 @@ async def echo(ctx):
     await ctx.send(text)
 ```
   - Both `ctx.author` and `ctx.channel` also include these methods. 
-    However they do lack some things. (See below)
+    However, they do lack some things. (See below)
 
 
 - The bot features many convenience methods. 
   The following methods exist in order to *always* get
   the given object or error trying.
 
+  - `await bot.get_or_fetch_user(user_id)`
+    - This returns a `User` which includes the above methods.
+  - `await bot.get_or_fetch_channel(channel_id)`
+    - This returns a `Channel` which includes the above methods 
+      with the follow caveats:
+      - Both `prompt` and `get_input` require `author_id` for checks
+      - `send_basic_embed` will not set footers or timestamps
+  - `await bot.get_or_fetch_guild(guild_id)`
+    - Simply returns a `nextcord.Guild` object from cache or api
+  - `await bot.get_or_fetch_member(guild_object: nextcord.Guild, member_id)`
+    - This returns a `Member` which includes the above methods.
 
-- User / Member's 
-These classes work the same as calling directly on `ctx`
+  - **NOTE**
+    These classes with methods attach do not subclass the relevant
+    class so `isinstance` checks will fail. In order to do isinstance 
+    checks you need to do the following.
 
-- Channel Methods
-Channels feature all the above methods with the following constraints:
-    - Both `prompt` and `get_input` require `author_id` for checks
-    - `send_basic_embed` will not set footers or timestamps
+```python
+# To check for Guild
+import nextcord
+
+guild = await bot.get_or_fetch_guild(98765)
+if isinstance(guild, nextcord.Guild):
+    # It just returns `nextcord.Guild`
+    print("This is a nextcord.Guild!")
+
+# To check for User
+user = await bot.get_or_fetch_user(12345)
+if isinstance(user.person, nextcord.User):
+    print("This person is a nextcord.User!")
+
+# To check for Member
+member = await bot.get_or_fetch_member(guild, 12345)
+if isinstance(member.person, nextcord.Member):
+    print("This person is a nextcord.Member!")
+
+# To check for Channel
+channel = await bot.get_or_fetch_channel(45678)
+if isinstance(channel.channel, nextcord.TextChannel):
+    print("This channel is a TextChannel")
+```
