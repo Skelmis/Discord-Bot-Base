@@ -10,6 +10,9 @@ class MongoManager:
         self.__mongo = AsyncIOMotorClient(connection_url)
         self.db = self.__mongo[database_name]
 
+    def typed_lookup(self, attr: str) -> Document:
+        return getattr(self, attr)
+
     def __getattr__(self, item) -> Document:
         """
         Parameters
@@ -22,7 +25,7 @@ class MongoManager:
         Document
             A Document made for said item
         """
-        doc = Document(self.db, item)
+        doc: Document = Document(self.db, item)
         setattr(self, item, doc)
 
         return doc

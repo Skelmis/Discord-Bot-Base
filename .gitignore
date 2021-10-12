@@ -1,6 +1,6 @@
 venv/
 .idea
-
+notes.txt
 # Distribution / packaging
 .Python
 build/
