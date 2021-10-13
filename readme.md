@@ -61,6 +61,21 @@ async def on_ready():
 
 ---
 
+```python
+import os
+from bot_base import BotBase
+
+
+bot = BotBase(
+    command_prefix="!", mongo_url=os.environ["MONGO_URL"], mongo_database_name="my_bot"
+)
+
+# Get your bots uptime easy peasy
+uptime = bot.get_bot_uptime()
+```
+
+---
+
 `.prompt(message, *, timeout=60.0, delete_after=True, author_id=None)`
 > Easily get back a Yes or No to a given message,
 > subclassed context allows for simplified command interactions.
