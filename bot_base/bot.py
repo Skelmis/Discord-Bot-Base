@@ -152,7 +152,7 @@ class BotBase(commands.Bot):
             log.debug(f"Ignoring blacklisted user: {ctx.author.id}")
             return
 
-        if ctx.guild.id is not None and ctx.guild.id in self.blacklist.guilds:
+        if ctx.guild is not None and ctx.guild.id in self.blacklist.guilds:
             log.debug(f"Ignoring blacklisted guild: {ctx.guild.id}")
             return
 
