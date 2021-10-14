@@ -14,3 +14,7 @@ class WrappedPerson(Meta):
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from author itself"""
         return getattr(self.person, item)
+
+    @property
+    def __class__(self):
+        return type(self.person)

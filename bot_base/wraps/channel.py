@@ -14,3 +14,7 @@ class WrappedChannel(Meta):
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from channel itself"""
         return getattr(self.channel, item)
+
+    @property
+    def __class__(self):
+        return type(self.channel)
