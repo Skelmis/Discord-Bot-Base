@@ -18,3 +18,12 @@ class WrappedChannel(Meta):
     @property
     def __class__(self):
         return type(self.channel)
+
+    def __eq__(self, other):
+        if not isinstance(other, (type(self.channel), WrappedChannel)):
+            return False
+
+        if isinstance(other, type(self.channel)):
+            return other.id == self.channel.id
+
+        return other.channel.id == self.channel.id

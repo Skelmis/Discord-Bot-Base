@@ -18,3 +18,12 @@ class WrappedPerson(Meta):
     @property
     def __class__(self):
         return type(self.person)
+
+    def __eq__(self, other):
+        if not isinstance(other, (type(self.person), WrappedPerson)):
+            return False
+
+        if isinstance(other, type(self.person)):
+            return other.id == self.person.id
+
+        return other.person.id == self.person.id
