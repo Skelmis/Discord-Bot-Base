@@ -22,12 +22,21 @@ class BotBase(commands.Bot):
             kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
         )
         self.blacklist = BlacklistManager(self.db)
-        self.uptime = datetime.datetime.now(tz=datetime.timezone.utc)
+        self._uptime = datetime.datetime.now(tz=datetime.timezone.utc) # Making this a privte method cause people might override this
+        # will use a property instead
 
         self.DEFAULT_PREFIX = kwargs.get("command_prefix")
 
         super().__init__(*args, **kwargs)
 
+    @property
+    def uptime(self):
+        return self._uptime
+    
+    @uptime.setter
+    def uptime_set(self, value):
+        raise RuntimeError("You don't want to change this, please")
+        
     def get_bot_uptime(self):
         return humanize.precisedelta(
             self.uptime - datetime.datetime.now(tz=datetime.timezone.utc)
