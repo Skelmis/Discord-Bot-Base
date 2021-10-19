@@ -15,7 +15,7 @@ class Meta:
 
     async def prompt(
         self,
-        message,
+        message: str,
         *,
         timeout=60.0,
         delete_after=True,
@@ -114,17 +114,29 @@ class Meta:
 
     async def get_input(
         self,
-        contentOne: int = "Please enter your desired input",
-        contentTwo: int = "\uFEFF",
+        title: str = None,
+        description: str = None,
         *,
         timeout: int = 100,
         delete_after: bool = True,
         author_id=None,
     ) -> Optional[str]:
-        embed = nextcord.Embed(
-            title=f"{contentOne}",
-            description=f"{contentTwo}",
-        )
+        if title and not description:
+            embed = nextcord.Embed(
+                title=title,
+            )
+        elif not title and description:
+            embed = nextcord.Embed(
+                description=description,
+            )
+        elif title and description:
+            embed = nextcord.Embed(
+                title=title,
+                description=description,
+            )
+        else:
+            raise RuntimeError("Expected atleast title or description")
+
         sent = await self.send(embed=embed)
         val = None
 
