@@ -11,7 +11,7 @@ class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):  # noqa
     """Wraps nextcord.TextChannel for ease of stuff"""
 
     def __init__(self, channel: Union[abc.GuildChannel, abc.PrivateChannel]):
-        self.channel = channel
+        self.channel: Union[abc.GuildChannel, abc.PrivateChannel] = channel
 
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from channel itself"""
