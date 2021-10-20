@@ -62,7 +62,7 @@ class Document:
     async def upsert(self, data, option="set", *args, **kwargs) -> None:
         await self.update_by_id(data, option, upsert=True, *args, **kwargs)
 
-    async def update_by_id(self, data, option="set", *args, **kwargs) -> None:
+    async def update_by_id(self, data: dict, option="set", *args, **kwargs) -> None:
         self.__ensure_dict(data)
         self.__ensure_id(data)
 
@@ -114,9 +114,9 @@ class Document:
 
     # <-- Private methods -->
     @staticmethod
-    def __ensure_dict(data):
+    def __ensure_dict(data) -> None:
         assert isinstance(data, collections.abc.Mapping)  # noqa
 
     @staticmethod
-    def __ensure_id(data):
+    def __ensure_id(data: Dict) -> None:
         assert "_id" in data

@@ -2,9 +2,11 @@ import datetime
 import sys
 import logging
 import traceback
+from typing import Optional, List
 
 import nextcord
 import humanize
+from nextcord import DiscordException
 from nextcord.ext import commands
 from nextcord.ext.commands.converter import CONVERTER_MAPPING
 
@@ -29,30 +31,32 @@ CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannelConvertor
 
 
 class BotBase(commands.Bot):
-    def __init__(self, *args, **kwargs):
-        self.db = MongoManager(
+    def __init__(self, *args, **kwargs) -> None:
+        self.db: MongoManager = MongoManager(
             kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
         )
-        self.blacklist = BlacklistManager(self.db)
-        self._uptime = datetime.datetime.now(tz=datetime.timezone.utc)
+        self.blacklist: BlacklistManager = BlacklistManager(self.db)
+        self._uptime: datetime.datetime = datetime.datetime.now(
+            tz=datetime.timezone.utc
+        )
 
-        self.DEFAULT_PREFIX = kwargs.get("command_prefix")
+        self.DEFAULT_PREFIX: str = kwargs.get("command_prefix")  # type: ignore
 
         super().__init__(*args, **kwargs)
 
     @property
-    def uptime(self):
+    def uptime(self) -> datetime.datetime:
         return self._uptime
 
-    def get_bot_uptime(self):
+    def get_bot_uptime(self) -> str:
         return humanize.precisedelta(
             self.uptime - datetime.datetime.now(tz=datetime.timezone.utc)
         )
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         await self.blacklist.initialize()
 
-    async def get_command_prefix(self, message):
+    async def get_command_prefix(self, message: nextcord.Message) -> List[str]:
         try:
             prefix = await self.get_guild_prefix(guild_id=message.guild.id)
 
@@ -68,7 +72,7 @@ class BotBase(commands.Bot):
             return commands.when_mentioned_or(self.DEFAULT_PREFIX)(self, message)
 
     # TODO Add caching
-    async def get_guild_prefix(self, guild_id: int = None) -> str:
+    async def get_guild_prefix(self, guild_id: Optional[int] = None) -> str:
         """
         Using a cached property fetch prefixes
         for a guild and return em.
@@ -94,13 +98,13 @@ class BotBase(commands.Bot):
         if not prefix_data:
             raise PrefixNotFound
 
-        prefix = prefix_data.get("prefix")
+        prefix: Optional[str] = prefix_data.get("prefix")
         if not prefix:
             raise PrefixNotFound
 
         return prefix
 
-    async def on_command_error(self, ctx, error):
+    async def on_command_error(self, ctx: BotContext, error: DiscordException) -> None:
         error = getattr(error, "original", error)
 
         if isinstance(error, commands.NoPrivateMessage):
@@ -136,7 +140,7 @@ class BotBase(commands.Bot):
         log.debug(f"Command failed: `{ctx.command.qualified_name}`")
         raise error
 
-    async def on_command_completion(self, ctx):
+    async def on_command_completion(self, ctx: BotContext) -> None:
         if ctx.command.qualified_name == "logout":
             return
 
@@ -154,11 +158,11 @@ class BotBase(commands.Bot):
             )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
-    async def on_guild_join(self, guild: nextcord.Guild):
+    async def on_guild_join(self, guild: nextcord.Guild) -> None:
         if guild.id in self.blacklist.guilds:
             await guild.leave()
 
-    async def process_commands(self, message: nextcord.Message):
+    async def process_commands(self, message: nextcord.Message) -> None:
         ctx = await self.get_context(message, cls=BotContext)
 
         if ctx.command is None:
@@ -174,7 +178,7 @@ class BotBase(commands.Bot):
 
         await self.invoke(ctx)
 
-    async def on_message(self, message: nextcord.Message):
+    async def on_message(self, message: nextcord.Message) -> None:
         if message.author.bot:
             return
 
