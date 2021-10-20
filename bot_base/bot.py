@@ -4,13 +4,14 @@ import logging
 import traceback
 from typing import Optional, List
 
-import discord
 import humanize
 
 try:
+    import nextcord as discord
     from nextcord import DiscordException
     from nextcord.ext import commands
 except ModuleNotFoundError:
+    import discord
     from discord import DiscordException
     from discord.ext import commands
 
