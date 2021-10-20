@@ -7,7 +7,7 @@ from nextcord.ext import commands
 from bot_base.wraps.meta import Meta
 
 
-class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):
+class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):  # noqa
     """Wraps nextcord.TextChannel for ease of stuff"""
 
     def __init__(self, channel: Union[abc.GuildChannel, abc.PrivateChannel]):
