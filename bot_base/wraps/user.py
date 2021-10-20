@@ -18,7 +18,7 @@ class WrappedUser(Meta, nextcord.User):
     def __class__(self):
         return type(self.person)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, (type(self.person), WrappedUser)):
             return False
 

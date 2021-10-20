@@ -21,7 +21,7 @@ class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):  # noqa
     def __class__(self):
         return type(self.channel)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if not isinstance(other, (type(self.channel), WrappedChannel)):
             return False
 
