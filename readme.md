@@ -193,3 +193,9 @@ async def test(ctx, member: nextcord.Member):
 
     # Now you have the correct autocomplete for member
 ```
+
+
+Optimisation
+---
+
+Please note, all wrapped classes are not slotted.

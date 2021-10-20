@@ -11,16 +11,14 @@ class WrappedChannel(Meta):
 
     def __init__(self, channel: Union[abc.GuildChannel, abc.PrivateChannel]):
         self.channel = channel
-        self.hi = "Hi"
 
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from channel itself"""
         return getattr(self.channel, item)
 
-    #
-    # @property
-    # def __class__(self):
-    #     return type(self.channel)
+    @property
+    def __class__(self):
+        return type(self.channel)
 
     def __eq__(self, other):
         if not isinstance(other, (type(self.channel), WrappedChannel)):
