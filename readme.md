@@ -1,8 +1,11 @@
-## Nextcord Bot Base
+## Discord Bot Base
 
 
 A subclass of `commands.Bot` which implements the following features
 and reduces the boilerplate between discord bots.
+
+This should support all discord.py 2.x.x forks, however it is only tested
+agaisnt nextcord.
 
 [https://pypi.org/project/Bot-Base/](https://pypi.org/project/Bot-Base/)
 

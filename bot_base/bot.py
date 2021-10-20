@@ -4,11 +4,15 @@ import logging
 import traceback
 from typing import Optional, List
 
-import nextcord
+import discord
 import humanize
-from nextcord import DiscordException
-from nextcord.ext import commands
-from nextcord.ext.commands.converter import CONVERTER_MAPPING
+
+try:
+    from nextcord import DiscordException
+    from nextcord.ext import commands
+except ModuleNotFoundError:
+    from discord import DiscordException
+    from discord.ext import commands
 
 from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
@@ -25,9 +29,16 @@ from bot_base.wraps import (
 
 log = logging.getLogger(__name__)
 
-CONVERTER_MAPPING[nextcord.User] = WrappedUserConvertor
-CONVERTER_MAPPING[nextcord.Member] = WrappedMemberConvertor
-CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannelConvertor
+try:
+    from nextcord.ext.commands.converter import CONVERTER_MAPPING
+
+    CONVERTER_MAPPING[discord.User] = WrappedUserConvertor
+    CONVERTER_MAPPING[discord.Member] = WrappedMemberConvertor
+    CONVERTER_MAPPING[discord.TextChannel] = WrappedChannelConvertor
+except ModuleNotFoundError:
+    raise RuntimeWarning(
+        "You don't have overridden converters. Please open an issue and name the fork your using."
+    )
 
 
 class BotBase(commands.Bot):
@@ -56,7 +67,7 @@ class BotBase(commands.Bot):
     async def on_ready(self) -> None:
         await self.blacklist.initialize()
 
-    async def get_command_prefix(self, message: nextcord.Message) -> List[str]:
+    async def get_command_prefix(self, message: discord.Message) -> List[str]:
         try:
             prefix = await self.get_guild_prefix(guild_id=message.guild.id)
 
@@ -113,7 +124,7 @@ class BotBase(commands.Bot):
             await ctx.author.send("Sorry. This command is disabled and cannot be used.")
         elif isinstance(error, commands.CommandInvokeError):
             original = error.original
-            if not isinstance(original, nextcord.HTTPException):
+            if not isinstance(original, discord.HTTPException):
                 print(f"In {ctx.command.qualified_name}:", file=sys.stderr)
                 traceback.print_tb(original.__traceback__)
                 print(f"{original.__class__.__name__}: {original}", file=sys.stderr)
@@ -158,11 +169,11 @@ class BotBase(commands.Bot):
             )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
-    async def on_guild_join(self, guild: nextcord.Guild) -> None:
+    async def on_guild_join(self, guild: discord.Guild) -> None:
         if guild.id in self.blacklist.guilds:
             await guild.leave()
 
-    async def process_commands(self, message: nextcord.Message) -> None:
+    async def process_commands(self, message: discord.Message) -> None:
         ctx = await self.get_context(message, cls=BotContext)
 
         if ctx.command is None:
@@ -178,7 +189,7 @@ class BotBase(commands.Bot):
 
         await self.invoke(ctx)
 
-    async def on_message(self, message: nextcord.Message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         if message.author.bot:
             return
 
@@ -203,7 +214,7 @@ class BotBase(commands.Bot):
         channel = await self.fetch_channel(channel_id)
         return WrappedChannel(channel)
 
-    async def get_or_fetch_guild(self, guild_id: int) -> nextcord.Guild:
+    async def get_or_fetch_guild(self, guild_id: int) -> discord.Guild:
         """Looks up a guild in cache or fetches if not found."""
         guild = self.get_guild(guild_id)
         if guild:

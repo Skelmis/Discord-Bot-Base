@@ -1,4 +1,7 @@
-from nextcord import DiscordException
+try:
+    from nextcord import DiscordException
+except ModuleNotFoundError:
+    from discord import DiscordException
 
 
 class PrefixNotFound(DiscordException):

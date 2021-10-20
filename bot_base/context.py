@@ -1,4 +1,7 @@
-from nextcord.ext import commands
+try:
+    from nextcord.ext import commands
+except ModuleNotFoundError:
+    from discord.ext import commands
 
 from bot_base.wraps import Meta, WrappedChannel, WrappedMember, WrappedUser
 

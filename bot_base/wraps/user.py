@@ -1,14 +1,18 @@
-import nextcord
-from nextcord.ext import commands
+try:
+    import nextcord as discord
+    from nextcord.ext import commands
+except ModuleNotFoundError:
+    import discord
+    from discord.ext import commands
 
 from bot_base.wraps.meta import Meta
 
 
-class WrappedUser(Meta, nextcord.User):
-    """Wraps nextcord.user for ease of stuff"""
+class WrappedUser(Meta, discord.User):
+    """Wraps discord.user for ease of stuff"""
 
-    def __init__(self, person: nextcord.User):
-        self.person: nextcord.User = person
+    def __init__(self, person: discord.User):
+        self.person: discord.User = person
 
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from author itself"""
@@ -29,8 +33,8 @@ class WrappedUser(Meta, nextcord.User):
 
 
 class WrappedUserConvertor(commands.UserConverter):
-    """Return WrappedUser on :nextcord.User"""
+    """Return WrappedUser on :discord.User"""
 
     async def convert(self, ctx, argument: str) -> WrappedUser:
-        user: nextcord.User = await super().convert(ctx=ctx, argument=argument)
+        user: discord.User = await super().convert(ctx=ctx, argument=argument)
         return WrappedUser(user)

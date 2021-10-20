@@ -1,7 +1,10 @@
 import asyncio
 from typing import Optional
 
-import nextcord
+try:
+    import nextcord as discord
+except ModuleNotFoundError:
+    import discord
 
 from . import channel
 
@@ -97,7 +100,7 @@ class Meta:
         """Wraps a string to send formatted as an embed"""
         target = target or self.channel
 
-        embed = nextcord.Embed(description=desc)
+        embed = discord.Embed(description=desc)
 
         if color:
             embed.colour = color
@@ -122,15 +125,15 @@ class Meta:
         author_id=None,
     ) -> Optional[str]:
         if title and not description:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title=title,
             )
         elif not title and description:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 description=description,
             )
         elif title and description:
-            embed = nextcord.Embed(
+            embed = discord.Embed(
                 title=title,
                 description=description,
             )
