@@ -6,14 +6,25 @@ import traceback
 import nextcord
 import humanize
 from nextcord.ext import commands
+from nextcord.ext.commands.converter import CONVERTER_MAPPING
 
 from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
 from bot_base.db import MongoManager
 from bot_base.exceptions import PrefixNotFound
-from bot_base.wraps import WrappedChannel, WrappedPerson
+from bot_base.wraps import (
+    WrappedChannel,
+    WrappedPerson,
+    WrappedChannelConvertor,
+    WrappedMemberConvertor,
+    WrappedUserConvertor,
+)
 
 log = logging.getLogger(__name__)
+
+CONVERTER_MAPPING[nextcord.User] = WrappedUserConvertor
+CONVERTER_MAPPING[nextcord.Member] = WrappedMemberConvertor
+CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannelConvertor
 
 
 class BotBase(commands.Bot):
@@ -22,8 +33,7 @@ class BotBase(commands.Bot):
             kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
         )
         self.blacklist = BlacklistManager(self.db)
-        self._uptime = datetime.datetime.now(tz=datetime.timezone.utc) # Making this a privte method cause people might override this
-        # will use a property instead
+        self._uptime = datetime.datetime.now(tz=datetime.timezone.utc)
 
         self.DEFAULT_PREFIX = kwargs.get("command_prefix")
 
@@ -32,11 +42,7 @@ class BotBase(commands.Bot):
     @property
     def uptime(self):
         return self._uptime
-    
-    @uptime.setter
-    def uptime_set(self, value):
-        raise RuntimeError("You don't want to change this, please")
-        
+
     def get_bot_uptime(self):
         return humanize.precisedelta(
             self.uptime - datetime.datetime.now(tz=datetime.timezone.utc)

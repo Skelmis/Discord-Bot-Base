@@ -1,6 +1,8 @@
 import logging
 import os
 
+import nextcord
+
 from bot_base import BotBase
 
 bot = BotBase(
