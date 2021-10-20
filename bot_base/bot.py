@@ -14,10 +14,11 @@ from bot_base.db import MongoManager
 from bot_base.exceptions import PrefixNotFound
 from bot_base.wraps import (
     WrappedChannel,
-    WrappedPerson,
+    WrappedMember,
     WrappedChannelConvertor,
     WrappedMemberConvertor,
     WrappedUserConvertor,
+    WrappedUser,
 )
 
 log = logging.getLogger(__name__)
@@ -179,17 +180,15 @@ class BotBase(commands.Bot):
 
         await self.process_commands(message)
 
-    @staticmethod
-    async def get_or_fetch_member(
-        guild: nextcord.Guild, member_id: int
-    ) -> WrappedPerson:
+    async def get_or_fetch_member(self, guild_id: int, member_id: int) -> WrappedMember:
         """Looks up a member in cache or fetches if not found."""
+        guild = await self.get_or_fetch_guild(guild_id)
         member = guild.get_member(member_id)
         if member is not None:
-            return WrappedPerson(member)
+            return WrappedMember(member)
 
         member = await guild.fetch_member(member_id)
-        return WrappedPerson(member)
+        return WrappedMember(member)
 
     async def get_or_fetch_channel(self, channel_id: int) -> WrappedChannel:
         """Looks up a channel in cache or fetches if not found."""
@@ -209,11 +208,11 @@ class BotBase(commands.Bot):
         guild = await self.fetch_guild(guild_id)
         return guild
 
-    async def get_or_fetch_user(self, user_id: int) -> WrappedPerson:
+    async def get_or_fetch_user(self, user_id: int) -> WrappedUser:
         """Looks up a user in cache or fetches if not found."""
         user = self.get_user(user_id)
         if user:
-            return WrappedPerson(user)
+            return WrappedUser(user)
 
         user = await self.fetch_user(user_id)
-        return WrappedPerson(user)
+        return WrappedUser(user)

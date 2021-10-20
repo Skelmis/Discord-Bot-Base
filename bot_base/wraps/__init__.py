@@ -1,3 +1,4 @@
 from .channel import WrappedChannel, WrappedChannelConvertor
 from .meta import Meta
-from .person import WrappedPerson, WrappedMemberConvertor, WrappedUserConvertor
+from .member import WrappedMember, WrappedMemberConvertor
+from .user import WrappedUser, WrappedUserConvertor

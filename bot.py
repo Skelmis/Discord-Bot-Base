@@ -1,10 +1,8 @@
 import logging
 import os
 
-import nextcord
-
 from bot_base import BotBase
-from bot_base.wraps import WrappedMemberConvertor, WrappedPerson
+
 
 bot = BotBase(
     command_prefix="!", mongo_url=os.environ["MONGO_URL"], mongo_database_name="my_bot"

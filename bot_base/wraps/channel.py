@@ -1,12 +1,13 @@
 from typing import Union
 
+import nextcord
 from nextcord import abc
 from nextcord.ext import commands
 
 from bot_base.wraps.meta import Meta
 
 
-class WrappedChannel(Meta):
+class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):
     """Wraps nextcord.TextChannel for ease of stuff"""
 
     def __init__(self, channel: Union[abc.GuildChannel, abc.PrivateChannel]):
@@ -31,7 +32,7 @@ class WrappedChannel(Meta):
 
 
 class WrappedChannelConvertor(commands.TextChannelConverter):
-    """Return WrappedPerson on :nextcord.Member"""
+    """Return WrappedMember on :nextcord.Member"""
 
     async def convert(self, ctx, argument: str) -> WrappedChannel:
         channel: Union[abc.GuildChannel, abc.PrivateChannel] = await super().convert(
