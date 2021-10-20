@@ -175,3 +175,21 @@ await bot.get_or_fetch_guild(guild_id)
 await bot.get_or_fetch_member(guild_object: nextcord.Guild, member_id)
 ```
 - This returns a `Member` which includes the above methods.
+
+Convertors
+---
+
+All attempts to use typehints to convert `nextcord.Member`, 
+`nextcord.User` and `nextcord.TextChannel` 
+will return a wrapped instance of those classes. 
+Although the type's are currently playing up so you 
+might get autocomplete errors even though it works.
+
+If you wish to fix this, I recommended doing the following.
+```python
+@bot.command()
+async def test(ctx, member: nextcord.Member):
+    member: WrappedPerson = member  # noqa
+
+    # Now you have the correct autocomplete for member
+```
