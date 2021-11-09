@@ -2,7 +2,7 @@ from .bot import BotBase
 import logging
 from collections import namedtuple
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
