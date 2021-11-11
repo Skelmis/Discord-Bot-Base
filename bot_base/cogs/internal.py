@@ -25,7 +25,12 @@ class Internal(commands.Cog):
         """Top level blacklist interface"""
         await ctx.send_help(ctx.command)
 
-    @blacklist.command()
+    @commands.group(invoke_without_command=True)
+    async def add(self, ctx: BotContext) -> None:
+        """Add something to the blacklist"""
+        await ctx.send_help(ctx.command)
+
+    @add.command()
     async def person(self, ctx: BotContext, user: discord.Object, *, reason=None) -> None:
         """Add someone to the blacklist"""
         await self.bot.blacklist.add_to_blacklist(
@@ -35,7 +40,7 @@ class Internal(commands.Cog):
         )
         await ctx.send_basic_embed(f"I have added <@{user.id}> to the blacklist.")
 
-    @blacklist.command()
+    @add.command()
     async def guild(self, ctx: BotContext, guild: discord.Object, *, reason=None) -> None:
         await self.bot.blacklist.add_to_blacklist(
             guild.id,
@@ -43,6 +48,29 @@ class Internal(commands.Cog):
             is_guild_blacklist=True
         )
         await ctx.send_basic_embed(f"I have added the guild `{guild.id}` to the blacklist")
+
+    @blacklist.group()
+    async def remove(self, ctx: BotContext) -> None:
+        """Remove something from the blacklist"""
+        await ctx.send_help(ctx.command)
+
+    @remove.command()
+    async def person(self, ctx: BotContext, user: discord.Object) -> None:
+        """Remove a person from the blacklist.
+
+        Does nothing if they weren't blacklisted.
+        """
+        await self.bot.blacklist.remove_from_blacklist(user.id, is_guild_blacklist=False)
+        await ctx.send_basic_embed("I have completed that action for you.")
+
+    @remove.command()
+    async def guild(self, ctx: BotContext, guild: discord.Object) -> None:
+        """Remove a guild from the blacklist.
+
+        Does nothing if they weren't blacklisted.
+        """
+        await self.bot.blacklist.remove_from_blacklist(guild.id, is_guild_blacklist=True)
+        await ctx.send_basic_embed("I have completed that action for you.")
 
 def setup(bot):
     bot.add_cog(Internal(bot))

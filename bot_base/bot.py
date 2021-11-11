@@ -174,6 +174,7 @@ class BotBase(commands.Bot):
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         if guild.id in self.blacklist.guilds:
+            log.info("Leaving blacklisted Guild(id=%s)", guild.id)
             await guild.leave()
 
     async def process_commands(self, message: discord.Message) -> None:
@@ -191,6 +192,7 @@ class BotBase(commands.Bot):
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author.bot:
+            log.debug("Ignoring a message from a bot.")
             return
 
         await self.process_commands(message)
