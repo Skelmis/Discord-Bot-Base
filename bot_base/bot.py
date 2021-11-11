@@ -2,6 +2,7 @@ import datetime
 import sys
 import logging
 import traceback
+import warnings
 from typing import Optional, List
 
 import discord
@@ -36,8 +37,9 @@ try:
     CONVERTER_MAPPING[discord.Member] = WrappedMemberConvertor
     CONVERTER_MAPPING[discord.TextChannel] = WrappedChannelConvertor
 except ModuleNotFoundError:
-    raise RuntimeWarning(
-        "You don't have overridden converters. Please open an issue and name the fork your using."
+    warnings.warn(
+        "You don't have overridden converters. "
+        "Please open an issue and name the fork your using if you want them."
     )
 
 
