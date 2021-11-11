@@ -55,6 +55,9 @@ class BotBase(commands.Bot):
 
         self.DEFAULT_PREFIX: str = kwargs.get("command_prefix")  # type: ignore
 
+        if kwargs.pop("load_builtin_commands", None):
+            self.load_extension("cogs.internal")
+
         super().__init__(*args, **kwargs)
 
     @property

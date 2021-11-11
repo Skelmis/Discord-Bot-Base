@@ -72,5 +72,6 @@ class Internal(commands.Cog):
         await self.bot.blacklist.remove_from_blacklist(guild.id, is_guild_blacklist=True)
         await ctx.send_basic_embed("I have completed that action for you.")
 
+
 def setup(bot):
     bot.add_cog(Internal(bot))
