@@ -136,20 +136,21 @@ class BotBase(commands.Bot):
         elif isinstance(error, commands.NoPrivateMessage):
             await ctx.send("This command can only be used in Guilds.")
 
-        if await self.db.command_usage.find(ctx.command.qualified_name) is None:
-            await self.db.command_usage.upsert(
-                {
-                    "_id": ctx.command.qualified_name,
-                    "usage_count": 0,
-                    "failure_count": 1,
-                }
-            )
-        else:
-            await self.db.command_usage.increment(
-                ctx.command.qualified_name, 1, "failure_count"
-            )
+        if not isinstance(error, commands.CommandNotFound):
+            if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+                await self.db.command_usage.upsert(
+                    {
+                        "_id": ctx.command.qualified_name,
+                        "usage_count": 0,
+                        "failure_count": 1,
+                    }
+                )
+            else:
+                await self.db.command_usage.increment(
+                    ctx.command.qualified_name, 1, "failure_count"
+                )
 
-        log.debug(f"Command failed: `{ctx.command.qualified_name}`")
+            log.debug(f"Command failed: `{ctx.command.qualified_name}`")
         raise error
 
     async def on_command_completion(self, ctx: BotContext) -> None:
@@ -176,9 +177,6 @@ class BotBase(commands.Bot):
 
     async def process_commands(self, message: discord.Message) -> None:
         ctx = await self.get_context(message, cls=BotContext)
-
-        if ctx.command is None:
-            return
 
         if ctx.author.id in self.blacklist.users:
             log.debug(f"Ignoring blacklisted user: {ctx.author.id}")
