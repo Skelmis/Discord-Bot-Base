@@ -8,6 +8,8 @@ from typing import Optional, List
 import discord
 import humanize
 
+from bot_base.caches import TimedCache
+
 try:
     from nextcord import DiscordException
     from nextcord.ext import commands
@@ -52,6 +54,7 @@ class BotBase(commands.Bot):
         self._uptime: datetime.datetime = datetime.datetime.now(
             tz=datetime.timezone.utc
         )
+        self.prefix_cache: TimedCache = TimedCache()
 
         self.DEFAULT_PREFIX: str = kwargs.get("command_prefix")  # type: ignore
 
@@ -87,7 +90,6 @@ class BotBase(commands.Bot):
         except (AttributeError, PrefixNotFound):
             return commands.when_mentioned_or(self.DEFAULT_PREFIX)(self, message)
 
-    # TODO Add caching
     async def get_guild_prefix(self, guild_id: Optional[int] = None) -> str:
         """
         Using a cached property fetch prefixes
@@ -109,6 +111,9 @@ class BotBase(commands.Bot):
             We failed to find and
             return a valid prefix
         """
+        if guild_id in self.prefix_cache:
+            return self.prefix_cache.get_entry(guild_id)
+
         prefix_data = self.db.config.find(guild_id)
 
         if not prefix_data:
@@ -118,6 +123,7 @@ class BotBase(commands.Bot):
         if not prefix:
             raise PrefixNotFound
 
+        self.prefix_cache.add_entry(guild_id, prefix, override=True)
         return prefix
 
     async def on_command_error(self, ctx: BotContext, error: DiscordException) -> None:
