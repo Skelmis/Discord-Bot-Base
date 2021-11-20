@@ -1,6 +1,10 @@
+import asyncio
 from typing import Optional
 
-import nextcord
+try:
+    import nextcord as discord
+except ModuleNotFoundError:
+    import discord
 
 from . import channel
 
@@ -14,7 +18,7 @@ class Meta:
 
     async def prompt(
         self,
-        message,
+        message: str,
         *,
         timeout=60.0,
         delete_after=True,
@@ -92,11 +96,12 @@ class Meta:
         target=None,
         contain_timestamp: bool = True,
         include_command_invoker: bool = True,
-    ):
+        **kwargs
+    ) -> discord.Message:
         """Wraps a string to send formatted as an embed"""
         target = target or self.channel
 
-        embed = nextcord.Embed(description=desc)
+        embed = discord.Embed(description=desc)
 
         if color:
             embed.colour = color
@@ -109,21 +114,33 @@ class Meta:
                 text=self.author.display_name, icon_url=self.author.avatar.url
             )
 
-        return await target.send(embed=embed)
+        return await target.send(embed=embed, **kwargs)
 
     async def get_input(
         self,
-        contentOne: int = "Please enter your desired input",
-        contentTwo: int = "\uFEFF",
+        title: str = None,
+        description: str = None,
         *,
         timeout: int = 100,
         delete_after: bool = True,
         author_id=None,
     ) -> Optional[str]:
-        embed = nextcord.Embed(
-            title=f"{contentOne}",
-            description=f"{contentTwo}",
-        )
+        if title and not description:
+            embed = discord.Embed(
+                title=title,
+            )
+        elif not title and description:
+            embed = discord.Embed(
+                description=description,
+            )
+        elif title and description:
+            embed = discord.Embed(
+                title=title,
+                description=description,
+            )
+        else:
+            raise RuntimeError("Expected atleast title or description")
+
         sent = await self.send(embed=embed)
         val = None
 

@@ -17,9 +17,9 @@ async def on_ready():
 
 @bot.command()
 async def echo(ctx):
-    await ctx.delete()
+    await ctx.message.delete()
 
-    text = await ctx.get_input("What should I say?")
+    text = await ctx.get_input("What should I say?", timeout=5)
 
     if not text:
         return await ctx.send("You said nothing!")

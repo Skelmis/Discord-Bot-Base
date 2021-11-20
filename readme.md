@@ -1,17 +1,25 @@
-## Nextcord Bot Base
+## Discord Bot Base
 
 
 A subclass of `commands.Bot` which implements the following features
 and reduces the boilerplate between discord bots.
 
+This should support all discord.py 2.x.x forks, however it is only tested
+agaisnt nextcord.
+
+[https://pypi.org/project/Bot-Base/](https://pypi.org/project/Bot-Base/)
+
 Features
 --------
 
-> - Built in persistent blacklist system for both Guilds and Users
+- Built in persistent blacklist system for both Guilds and Users
 >   The bot leaves blacklisted guilds on join and doesn't process
 >   commands for anything blacklisted.
 > 
-> - Built in database using MongoDB with dynamic Document allocation.
+- Built in database using MongoDB with dynamic Document allocation.
+>
+- Built in commands for managing the blacklist
+>   Simply provide `load_builtin_commands=True` in your bot constructor
 
 ```python
 import os
@@ -57,6 +65,21 @@ async def on_ready():
     # Create a document connection to 'config' and get all entries
     configs = await bot.db.config.get_all()
     print(f"{len(configs)} stored guild configs!")
+```
+
+---
+
+```python
+import os
+from bot_base import BotBase
+
+
+bot = BotBase(
+    command_prefix="!", mongo_url=os.environ["MONGO_URL"], mongo_database_name="my_bot"
+)
+
+# Get your bots uptime easy peasy
+uptime = bot.get_bot_uptime()
 ```
 
 ---
@@ -161,38 +184,26 @@ await bot.get_or_fetch_member(guild_object: nextcord.Guild, member_id)
 ```
 - This returns a `Member` which includes the above methods.
 
+Convertors
 ---
 
-**NOTE**
-> These classes with methods attach do not subclass the relevant
-> class so `isinstance()` checks will fail. In order to do `isinstance()`
-> checks you need to do the following.
+All attempts to use typehints to convert `nextcord.Member`, 
+`nextcord.User` and `nextcord.TextChannel` 
+will return a wrapped instance of those classes. 
+Although the type's are currently playing up so you 
+might get autocomplete errors even though it works.
 
+If you wish to fix this, I recommended doing the following.
 ```python
-# To check for Guild
-import nextcord
+@bot.command()
+async def test(ctx, member: nextcord.Member):
+    member: WrappedPerson = member  # noqa
 
-
-guild = await bot.get_or_fetch_guild(98765)
-if isinstance(guild, nextcord.Guild):
-    # It just returns `nextcord.Guild`
-    print("This is a nextcord.Guild!")
-
-# To check for User
-user = await bot.get_or_fetch_user(12345)
-if isinstance(user.person, nextcord.User):
-    print("This person is a nextcord.User!")
-
-# To check for Member
-member = await bot.get_or_fetch_member(guild, 12345)
-if isinstance(member.person, nextcord.Member):
-    print("This person is a nextcord.Member!")
-
-# To check for Channel
-channel = await bot.get_or_fetch_channel(45678)
-if isinstance(channel.channel, nextcord.TextChannel):
-    print("This channel is a TextChannel")
-    
-# All objects also have there regular attributes attached
-print(f"Woah, thats {member.display_name}!")
+    # Now you have the correct autocomplete for member
 ```
+
+
+Optimisation
+---
+
+Please note, all wrapped classes are not slotted.
