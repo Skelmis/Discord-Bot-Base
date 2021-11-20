@@ -12,11 +12,14 @@ agaisnt nextcord.
 Features
 --------
 
-> - Built in persistent blacklist system for both Guilds and Users
+- Built in persistent blacklist system for both Guilds and Users
 >   The bot leaves blacklisted guilds on join and doesn't process
 >   commands for anything blacklisted.
 > 
-> - Built in database using MongoDB with dynamic Document allocation.
+- Built in database using MongoDB with dynamic Document allocation.
+>
+- Built in commands for managing the blacklist
+>   Simply provide `load_builtin_commands=True` in your bot constructor
 
 ```python
 import os

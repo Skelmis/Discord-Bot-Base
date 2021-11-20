@@ -2,6 +2,7 @@ import datetime
 import sys
 import logging
 import traceback
+import warnings
 from typing import Optional, List
 
 import humanize
@@ -37,8 +38,9 @@ try:
     CONVERTER_MAPPING[discord.Member] = WrappedMemberConvertor
     CONVERTER_MAPPING[discord.TextChannel] = WrappedChannelConvertor
 except ModuleNotFoundError:
-    raise RuntimeWarning(
-        "You don't have overridden converters. Please open an issue and name the fork your using."
+    warnings.warn(
+        "You don't have overridden converters. "
+        "Please open an issue and name the fork your using if you want them."
     )
 
 
@@ -53,6 +55,9 @@ class BotBase(commands.Bot):
         )
 
         self.DEFAULT_PREFIX: str = kwargs.get("command_prefix")  # type: ignore
+
+        if kwargs.pop("load_builtin_commands", None):
+            self.load_extension("cogs.internal")
 
         super().__init__(*args, **kwargs)
 
@@ -173,6 +178,7 @@ class BotBase(commands.Bot):
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         if guild.id in self.blacklist.guilds:
+            log.info("Leaving blacklisted Guild(id=%s)", guild.id)
             await guild.leave()
 
     async def process_commands(self, message: discord.Message) -> None:
@@ -190,6 +196,7 @@ class BotBase(commands.Bot):
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author.bot:
+            log.debug("Ignoring a message from a bot.")
             return
 
         await self.process_commands(message)
