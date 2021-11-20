@@ -73,7 +73,7 @@ class Cache(Protocol):
 
         Raises
         ------
-        InvalidKey
+        NonExistentEntry
             Either the cache doesn't contain
             the key, or the Entry timed out
         """

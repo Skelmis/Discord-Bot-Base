@@ -3,6 +3,7 @@ from typing import Any, Dict
 
 from bot_base.caches import Entry
 from bot_base.caches.abc import Cache
+from bot_base.exceptions import NonExistentEntry
 
 
 class TimedCache(Cache):
@@ -31,6 +32,12 @@ class TimedCache(Cache):
             self.cache.pop(key)
         except KeyError:
             pass
+
+    def get_entry(self, key: Any) -> Any:
+        if key not in self:
+            raise NonExistentEntry
+
+        return self.cache[key]
 
     def force_clean(self) -> None:
         now = datetime.now()
