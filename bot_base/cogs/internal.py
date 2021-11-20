@@ -24,16 +24,19 @@ class Internal(commands.Cog):
         log.info(f"{self.__class__.__name__}: Ready")
 
     @commands.group(invoke_without_command=True)
+    @commands.has_permissions(administrator=True)
     async def blacklist(self, ctx: BotContext) -> None:
         """Top level blacklist interface"""
         await ctx.send_help(ctx.command)
 
     @blacklist.group(invoke_without_command=True)
+    @commands.has_permissions(administrator=True)
     async def add(self, ctx: BotContext) -> None:
         """Add something to the blacklist"""
         await ctx.send_help(ctx.command)
 
     @add.command(name="person")
+    @commands.has_permissions(administrator=True)
     async def add_person(
         self, ctx: BotContext, user: discord.Object, *, reason=None
     ) -> None:
@@ -44,6 +47,7 @@ class Internal(commands.Cog):
         await ctx.send_basic_embed(f"I have added <@{user.id}> to the blacklist.")
 
     @add.command(name="guild")
+    @commands.has_permissions(administrator=True)
     async def add_guild(
         self, ctx: BotContext, guild: discord.Object, *, reason=None
     ) -> None:
@@ -55,6 +59,7 @@ class Internal(commands.Cog):
         )
 
     @blacklist.command()
+    @commands.has_permissions(administrator=True)
     async def list(self, ctx: BotContext) -> None:
         """List all current blacklists"""
         if self.bot.blacklist.users:
@@ -75,11 +80,13 @@ class Internal(commands.Cog):
         )
 
     @blacklist.group(invoke_without_command=True)
+    @commands.has_permissions(administrator=True)
     async def remove(self, ctx: BotContext) -> None:
         """Remove something from the blacklist"""
         await ctx.send_help(ctx.command)
 
     @remove.command(name="person")
+    @commands.has_permissions(administrator=True)
     async def remove_person(self, ctx: BotContext, user: discord.Object) -> None:
         """Remove a person from the blacklist.
 
@@ -91,6 +98,7 @@ class Internal(commands.Cog):
         await ctx.send_basic_embed("I have completed that action for you.")
 
     @remove.command(name="guild")
+    @commands.has_permissions(administrator=True)
     async def remove_guild(self, ctx: BotContext, guild: discord.Object) -> None:
         """Remove a guild from the blacklist.
 
