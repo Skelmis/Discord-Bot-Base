@@ -37,7 +37,7 @@ class TimedCache(Cache):
         if key not in self:
             raise NonExistentEntry
 
-        return self.cache[key]
+        return self.cache[key].value
 
     def force_clean(self) -> None:
         now = datetime.now()
