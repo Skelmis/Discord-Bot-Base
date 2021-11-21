@@ -13,7 +13,7 @@ def return_converted(func):
         data: Union[Dict, List[Dict]] = await func(*args, **kwargs)
 
         self: Document = args[0]
-        if not self.converter:
+        if not data or not self.converter:
             return data
 
         if not isinstance(data, list):
