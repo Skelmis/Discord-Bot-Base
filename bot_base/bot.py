@@ -47,13 +47,11 @@ except ModuleNotFoundError:
 
 class BotBase(commands.Bot):
     def __init__(self, *args, **kwargs) -> None:
-        mongo_manager = kwargs.pop("mongo_manager", None)
-        if not mongo_manager:
+        leave_db = kwargs.pop("leave_db", False)
+        if not leave_db:
             self.db: MongoManager = MongoManager(
                 kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
             )
-        else:
-            self.db: MongoManager = mongo_manager
 
         self.blacklist: BlacklistManager = BlacklistManager(self.db)
         self._uptime: datetime.datetime = datetime.datetime.now(
