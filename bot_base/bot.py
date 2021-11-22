@@ -60,7 +60,8 @@ class BotBase(commands.Bot):
         )
         self.prefix_cache: TimedCache = TimedCache()
 
-        self.DEFAULT_PREFIX: str = kwargs.get("command_prefix")  # type: ignore
+        self.DEFAULT_PREFIX: str = kwargs.pop("command_prefix")  # type: ignore
+        kwargs["command_prefix"] = self.get_command_prefix
 
         super().__init__(*args, **kwargs)
 
