@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from bot_base.caches import Entry
 from bot_base.caches.abc import Cache
-from bot_base.exceptions import NonExistentEntry
+from bot_base.exceptions import NonExistentEntry, ExistingEntry
 
 
 class TimedCache(Cache):
@@ -25,6 +25,10 @@ class TimedCache(Cache):
     def add_entry(
         self, key: Any, value: Any, *, ttl: timedelta = None, override: bool = False
     ) -> None:
+        ttl = ttl or timedelta()
+        if key in self and not override:
+            raise ExistingEntry
+
         self.cache[key] = Entry(value=value, expiry_time=(datetime.now() + ttl))
 
     def delete_entry(self, key: Any) -> None:
