@@ -80,7 +80,9 @@ class BotBase(commands.Bot):
     async def on_ready(self) -> None:
         await self.blacklist.initialize()
 
-    async def get_command_prefix(self, message: discord.Message) -> List[str]:
+    async def get_command_prefix(
+        self, bot: "BotBase", message: discord.Message
+    ) -> List[str]:
         try:
             prefix = await self.get_guild_prefix(guild_id=message.guild.id)
 
@@ -119,7 +121,7 @@ class BotBase(commands.Bot):
         if guild_id in self.prefix_cache:
             return self.prefix_cache.get_entry(guild_id)
 
-        prefix_data = self.db.config.find(guild_id)
+        prefix_data = await self.db.config.find(guild_id)
 
         if not prefix_data:
             raise PrefixNotFound
