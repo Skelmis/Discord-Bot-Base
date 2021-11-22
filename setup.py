@@ -1,7 +1,4 @@
 import re
-
-
-# from distutils.core import setup
 from setuptools import setup
 
 with open("readme.md", "r") as fh:
@@ -42,6 +39,9 @@ setup(
         "bot_base.db",
         "bot_base.blacklist",
         "bot_base.wraps",
+        "bot_base.caches",
+        "bot_base.convertors",
+        "bot_base.cogs",
     ],
     install_requires=parse_requirements_file("requirements.txt"),
     classifiers=[

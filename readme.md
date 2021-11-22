@@ -20,6 +20,14 @@ Features
 >
 - Built in commands for managing the blacklist
 >   Simply provide `load_builtin_commands=True` in your bot constructor
+> 
+- Custom prefix things
+> Case-insensitive prefixes
+> 
+> Prefix caching
+    If you plan on making a prefix command you need to do the following.
+
+    `bot.prefix_cache.add_entry(guild_id, new_prefix, override=True)`
 
 ```python
 import os

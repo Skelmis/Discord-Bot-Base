@@ -1,3 +1,4 @@
 dnspython
 motor
 humanize
+attrs

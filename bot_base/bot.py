@@ -7,6 +7,8 @@ from typing import Optional, List
 
 import humanize
 
+from bot_base.caches import TimedCache
+
 try:
     import nextcord as discord
     from nextcord import DiscordException
@@ -46,20 +48,24 @@ except ModuleNotFoundError:
 
 class BotBase(commands.Bot):
     def __init__(self, *args, **kwargs) -> None:
-        self.db: MongoManager = MongoManager(
-            kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
-        )
+        leave_db = kwargs.pop("leave_db", False)
+        if not leave_db:
+            self.db: MongoManager = MongoManager(
+                kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
+            )
+
         self.blacklist: BlacklistManager = BlacklistManager(self.db)
         self._uptime: datetime.datetime = datetime.datetime.now(
             tz=datetime.timezone.utc
         )
+        self.prefix_cache: TimedCache = TimedCache()
 
         self.DEFAULT_PREFIX: str = kwargs.get("command_prefix")  # type: ignore
 
-        if kwargs.pop("load_builtin_commands", None):
-            self.load_extension("cogs.internal")
-
         super().__init__(*args, **kwargs)
+
+        if kwargs.pop("load_builtin_commands", None):
+            self.load_extension("bot_base.cogs.internal")
 
     @property
     def uptime(self) -> datetime.datetime:
@@ -88,7 +94,6 @@ class BotBase(commands.Bot):
         except (AttributeError, PrefixNotFound):
             return commands.when_mentioned_or(self.DEFAULT_PREFIX)(self, message)
 
-    # TODO Add caching
     async def get_guild_prefix(self, guild_id: Optional[int] = None) -> str:
         """
         Using a cached property fetch prefixes
@@ -110,6 +115,9 @@ class BotBase(commands.Bot):
             We failed to find and
             return a valid prefix
         """
+        if guild_id in self.prefix_cache:
+            return self.prefix_cache.get_entry(guild_id)
+
         prefix_data = self.db.config.find(guild_id)
 
         if not prefix_data:
@@ -119,6 +127,7 @@ class BotBase(commands.Bot):
         if not prefix:
             raise PrefixNotFound
 
+        self.prefix_cache.add_entry(guild_id, prefix, override=True)
         return prefix
 
     async def on_command_error(self, ctx: BotContext, error: DiscordException) -> None:
