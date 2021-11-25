@@ -94,9 +94,10 @@ class Meta:
         *,
         color=None,
         target=None,
+        reply: bool = False,
         contain_timestamp: bool = True,
         include_command_invoker: bool = True,
-        **kwargs
+        **kwargs,
     ) -> discord.Message:
         """Wraps a string to send formatted as an embed"""
         target = target or self.channel
@@ -114,7 +115,10 @@ class Meta:
                 text=self.author.display_name, icon_url=self.author.avatar.url
             )
 
-        return await target.send(embed=embed, **kwargs)
+        if reply and isinstance(target, (BotContext, discord.Message)):
+            return await target.reply(embed=embed, **kwargs)
+        else:
+            return await target.send(embed=embed, **kwargs)
 
     async def get_input(
         self,
