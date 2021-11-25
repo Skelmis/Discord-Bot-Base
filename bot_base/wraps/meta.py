@@ -100,7 +100,11 @@ class Meta:
         **kwargs,
     ) -> discord.Message:
         """Wraps a string to send formatted as an embed"""
-        target = target or self.channel
+        from bot_base.context import BotContext
+
+        target = target or (
+            self.channel if not isinstance(self, BotContext) else self.message
+        )
 
         embed = discord.Embed(description=desc)
 
@@ -115,9 +119,7 @@ class Meta:
                 text=self.author.display_name, icon_url=self.author.avatar.url
             )
 
-        from bot_base.context import BotContext
-
-        if reply and isinstance(target, (BotContext, discord.Message)):
+        if reply and isinstance(target, discord.Message):
             return await target.reply(embed=embed, **kwargs)
         else:
             return await target.send(embed=embed, **kwargs)
