@@ -103,7 +103,9 @@ class Meta:
         from bot_base.context import BotContext
 
         target = target or (
-            self.channel if not isinstance(self, BotContext) else self.message
+            self.channel
+            if not isinstance(self, BotContext) and not reply
+            else self.message
         )
 
         embed = discord.Embed(description=desc)
