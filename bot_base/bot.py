@@ -86,16 +86,24 @@ class BotBase(commands.Bot):
         try:
             prefix = await self.get_guild_prefix(guild_id=message.guild.id)
 
-            if message.content.casefold().startswith(prefix.casefold()):
-                # The prefix matches, now return the one the user used
-                # such that dpy will dispatch the given command
-                prefix_length = len(prefix)
-                prefix = message.content[:prefix_length]
+            prefix = self.get_case_insensitive_prefix(message.content, prefix)
 
             return commands.when_mentioned_or(prefix)(self, message)
 
         except (AttributeError, PrefixNotFound):
-            return commands.when_mentioned_or(self.DEFAULT_PREFIX)(self, message)
+            prefix = self.get_case_insensitive_prefix(
+                message.content, self.DEFAULT_PREFIX
+            )
+            return commands.when_mentioned_or(prefix)(self, message)
+
+    def get_case_insensitive_prefix(self, content, prefix):
+        if content.casefold().startswith(prefix.casefold()):
+            # The prefix matches, now return the one the user used
+            # such that dpy will dispatch the given command
+            prefix_length = len(prefix)
+            prefix = content[:prefix_length]
+
+        return prefix
 
     async def get_guild_prefix(self, guild_id: Optional[int] = None) -> str:
         """

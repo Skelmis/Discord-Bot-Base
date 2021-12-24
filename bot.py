@@ -5,7 +5,7 @@ import os
 from bot_base import BotBase
 
 bot = BotBase(
-    command_prefix="!",
+    command_prefix="t.",
     mongo_url=os.environ["MONGO_URL"],
     mongo_database_name="my_bot",
     load_builtin_commands=True,
