@@ -161,6 +161,8 @@ class BotBase(commands.Bot):
             await ctx.send("This command can only be used in dm's.")
         elif isinstance(error, commands.NoPrivateMessage):
             await ctx.send("This command can only be used in Guilds.")
+        elif isinstance(error, BlacklistedEntry):
+            await ctx.send(error.message)
 
         if not isinstance(error, commands.CommandNotFound):
             if await self.db.command_usage.find(ctx.command.qualified_name) is None:
