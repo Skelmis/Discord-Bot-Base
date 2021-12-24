@@ -21,7 +21,7 @@ except ModuleNotFoundError:
 from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
 from bot_base.db import MongoManager
-from bot_base.exceptions import PrefixNotFound
+from bot_base.exceptions import PrefixNotFound, BlacklistedEntry
 from bot_base.wraps import (
     WrappedChannel,
     WrappedMember,
@@ -207,11 +207,11 @@ class BotBase(commands.Bot):
 
         if ctx.author.id in self.blacklist.users:
             log.debug(f"Ignoring blacklisted user: {ctx.author.id}")
-            return
+            raise BlacklistedEntry(f"Ignoring blacklisted user: {ctx.author.id}")
 
         if ctx.guild is not None and ctx.guild.id in self.blacklist.guilds:
             log.debug(f"Ignoring blacklisted guild: {ctx.guild.id}")
-            return
+            raise BlacklistedEntry(f"Ignoring blacklisted guild: {ctx.guild.id}")
 
         await self.invoke(ctx)
 

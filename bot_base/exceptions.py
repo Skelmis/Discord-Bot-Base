@@ -14,3 +14,8 @@ class ExistingEntry(DiscordException):
 
 class NonExistentEntry(DiscordException):
     """No entry found in the cache with this key."""
+
+
+class BlacklistedEntry(DiscordException):
+    def __init__(self, message: str):
+        self.message: str = message

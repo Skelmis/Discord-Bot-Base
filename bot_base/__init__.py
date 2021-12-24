@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from .bot import BotBase
 from .context import BotContext
+from .exceptions import *
 
 __version__ = "1.2.19"
 
