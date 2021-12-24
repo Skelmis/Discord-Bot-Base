@@ -1,6 +1,8 @@
-from .bot import BotBase
 import logging
 from collections import namedtuple
+
+from .bot import BotBase
+from .context import BotContext
 
 __version__ = "1.2.19"
 

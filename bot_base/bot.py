@@ -96,7 +96,8 @@ class BotBase(commands.Bot):
             )
             return commands.when_mentioned_or(prefix)(self, message)
 
-    def get_case_insensitive_prefix(self, content, prefix):
+    @staticmethod
+    def get_case_insensitive_prefix(content, prefix):
         if content.casefold().startswith(prefix.casefold()):
             # The prefix matches, now return the one the user used
             # such that dpy will dispatch the given command
