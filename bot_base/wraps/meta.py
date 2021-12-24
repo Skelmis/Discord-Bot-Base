@@ -36,6 +36,7 @@ class Meta:
         author_id: Optional[int]
             The member who should respond to the prompt. Defaults to the author of the
             Context's message.
+
         Returns
         --------
         Optional[bool]
