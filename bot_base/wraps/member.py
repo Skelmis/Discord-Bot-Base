@@ -16,6 +16,13 @@ class WrappedMember(Meta, discord.Member):
     def __init__(self, person: discord.Member) -> None:
         self.person: discord.Member = person
 
+    @classmethod
+    async def convert(cls, ctx, argument: str) -> "WrappedMember":
+        member: discord.Member = await commands.MemberConverter().convert(
+            ctx=ctx, argument=argument
+        )
+        return cls(member)
+
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from author itself"""
         return getattr(self.person, item)
@@ -32,11 +39,3 @@ class WrappedMember(Meta, discord.Member):
             return other.id == self.person.id
 
         return other.person.id == self.person.id
-
-
-class WrappedMemberConvertor(commands.MemberConverter):
-    """Return WrappedMember on :discord.Member"""
-
-    async def convert(self, ctx, argument: str) -> WrappedMember:
-        member: discord.Member = await super().convert(ctx=ctx, argument=argument)
-        return WrappedMember(member)

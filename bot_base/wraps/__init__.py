@@ -1,14 +1,11 @@
-from .channel import WrappedChannel, WrappedChannelConvertor
+from .channel import WrappedChannel
 from .meta import Meta
-from .member import WrappedMember, WrappedMemberConvertor
-from .user import WrappedUser, WrappedUserConvertor
+from .member import WrappedMember
+from .user import WrappedUser
 
 __all__ = (
     "WrappedChannel",
-    "WrappedChannelConvertor",
     "Meta",
     "WrappedMember",
-    "WrappedMemberConvertor",
     "WrappedUser",
-    "WrappedUserConvertor",
 )

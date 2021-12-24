@@ -25,9 +25,6 @@ from bot_base.exceptions import PrefixNotFound, BlacklistedEntry
 from bot_base.wraps import (
     WrappedChannel,
     WrappedMember,
-    WrappedChannelConvertor,
-    WrappedMemberConvertor,
-    WrappedUserConvertor,
     WrappedUser,
 )
 
@@ -36,9 +33,9 @@ log = logging.getLogger(__name__)
 try:
     from nextcord.ext.commands.converter import CONVERTER_MAPPING
 
-    CONVERTER_MAPPING[discord.User] = WrappedUserConvertor
-    CONVERTER_MAPPING[discord.Member] = WrappedMemberConvertor
-    CONVERTER_MAPPING[discord.TextChannel] = WrappedChannelConvertor
+    CONVERTER_MAPPING[discord.User] = WrappedUser
+    CONVERTER_MAPPING[discord.Member] = WrappedMember
+    CONVERTER_MAPPING[discord.TextChannel] = WrappedChannel
 except ModuleNotFoundError:
     warnings.warn(
         "You don't have overridden converters. "
