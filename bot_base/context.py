@@ -9,6 +9,7 @@ from bot_base.wraps import Meta, WrappedChannel, WrappedMember, WrappedUser
 class BotContext(commands.Context, Meta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._bot = self.bot
 
         self.message.channel = WrappedChannel(self.message.channel, bot=self.bot)
 
