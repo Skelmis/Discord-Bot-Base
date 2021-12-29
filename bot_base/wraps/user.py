@@ -38,3 +38,6 @@ class WrappedUser(Meta, discord.User):
             return other.id == self.person.id
 
         return other.person.id == self.person.id
+
+    def __hash__(self):
+        return hash(self.person)

@@ -40,3 +40,6 @@ class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):  # noqa
             return other.id == self.channel.id
 
         return other.channel.id == self.channel.id
+
+    def __hash__(self):
+        return hash(self.channel)
