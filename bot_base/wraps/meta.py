@@ -61,6 +61,8 @@ class Meta:
                     "Expected author_id when using prompt on a TextChannel"
                 )
 
+            author_id = self.id
+
         msg = await self.send(fmt)
         confirm = None
 
@@ -166,6 +168,8 @@ class Meta:
                 raise RuntimeError(
                     "Expected author_id when using prompt on a TextChannel"
                 )
+
+            author_id = self.id
 
         try:
             msg = await self._bot.wait_for(
