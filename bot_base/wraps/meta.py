@@ -80,7 +80,7 @@ class Meta:
         for emoji in ("\N{WHITE HEAVY CHECK MARK}", "\N{CROSS MARK}"):
             await msg.add_reaction(emoji)
         try:
-            await self.bot.wait_for("raw_reaction_add", check=check, timeout=timeout)
+            await self._bot.wait_for("raw_reaction_add", check=check, timeout=timeout)
         except asyncio.TimeoutError:
             confirm = None
         try:
@@ -168,7 +168,7 @@ class Meta:
                 )
 
         try:
-            msg = await self.bot.wait_for(
+            msg = await self._bot.wait_for(
                 "message",
                 timeout=timeout,
                 check=lambda message: message.author.id == author_id,

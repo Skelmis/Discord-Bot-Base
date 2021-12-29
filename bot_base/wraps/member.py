@@ -13,15 +13,16 @@ from bot_base.wraps.meta import Meta
 class WrappedMember(Meta, discord.Member):
     """Wraps discord.Member for ease of stuff"""
 
-    def __init__(self, person: discord.Member) -> None:
+    def __init__(self, person: discord.Member, bot) -> None:
         self.person: discord.Member = person
+        self._bot = bot
 
     @classmethod
     async def convert(cls, ctx, argument: str) -> "WrappedMember":
         member: discord.Member = await commands.MemberConverter().convert(
             ctx=ctx, argument=argument
         )
-        return cls(member)
+        return cls(member, ctx.bot)
 
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from author itself"""
