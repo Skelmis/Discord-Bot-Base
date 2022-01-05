@@ -502,5 +502,9 @@ class Document:
         return self._document_name
 
     @property
-    def database(self) -> AsyncIOMotorDatabase:
+    def raw_database(self) -> AsyncIOMotorDatabase:
         return self._database
+
+    @property
+    def raw_collection(self) -> AsyncIOMotorCollection:
+        return self._document
