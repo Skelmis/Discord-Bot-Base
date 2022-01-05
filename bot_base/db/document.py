@@ -1,7 +1,8 @@
 import functools
+from copy import deepcopy
 from typing import List, Dict, Optional, Union, Any, TypeVar, Type
 
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from motor.motor_asyncio import AsyncIOMotorDatabase, AsyncIOMotorCollection
 from pymongo.results import DeleteResult
 
 T = TypeVar("T")
@@ -36,7 +37,7 @@ def return_converted(func):
 
 
 class Document:
-    _version = 8
+    _version = 9
 
     def __init__(
         self,
@@ -50,7 +51,7 @@ class Document:
         database: AsyncIOMotorDatabase
             The database we are connected to
         document_name: str
-            What this document should be called
+            What this _document should be called
         converter: Optional[Type[T]]
             An optional converter to try
             convert all data-types which
@@ -58,54 +59,80 @@ class Document:
         """
         self._document_name: str = document_name
         self._database: AsyncIOMotorDatabase = database
-        self.document = database[document_name]
+        self._document: AsyncIOMotorCollection = database[document_name]
 
         self.converter: Type[T] = converter
 
     # <-- Pointer Methods -->
-    async def find(self, data_id: Any) -> Optional[Union[Dict[str, Any], Type[T]]]:
+    async def find(
+        self, filter_dict: Union[Dict, Any]
+    ) -> Optional[Union[Dict[str, Any], Type[T]]]:
         """
         Find and return one item.
 
         Parameters
         ----------
-        data_id: Any
-            The _id of the item to find
+        filter_dict: Union[Dict, Any]
+            The _id of the item to find,
+            if a Dict is passed that is
+            used as the filter.
 
         Returns
         -------
         Optional[Union[Dict[str, Any], Type[T]]]
             The result of the query
         """
-        return await self.find_by_id(data_id)
+        filter_dict = self.__convert_filter(filter_dict)
+        return await self.find_by_custom(filter_dict)
 
-    async def delete(self, data_id: Any) -> Optional[DeleteResult]:
+    async def delete(self, filter_dict: Union[Dict, Any]) -> Optional[DeleteResult]:
         """
         Delete an item from the Document
         if an item with that _id exists
 
         Parameters
         ----------
-        data_id: Any
-            The _id to delete
+        filter_dict: Union[Dict, Any]
+            The _id of the item to delete,
+            if a Dict is passed that is
+            used as the filter.
 
         Returns
         -------
-        Optional[DeleteResult]
+        DeleteResult
             The result of deletion
         """
-        return await self.delete_by_id(data_id)
+        filter_dict = self.__convert_filter(filter_dict)
+        return await self.delete_by_custom(filter_dict)
 
-    async def update(self, data: Dict[str, Any], *args: Any, **kwargs: Any) -> None:
+    async def update(
+        self,
+        filter_dict: Union[Dict, Any],
+        data: Dict[str, Any] = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
-        Update an existing document by _id
+        Update an existing _document within the database
 
         Parameters
         ----------
+        filter_dict: Union[Dict, Any]
+            The _id of the item to update by,
+            if a Dict is passed that is
+            used as the filter.
         data: Dict[str, Any]
             The data we want to update with
         """
-        await self.update_by_id(data, *args, **kwargs)
+        filter_dict = self.__convert_filter(filter_dict)
+
+        if data is None:
+            # Backwards compat so you can just pass something like
+            # await doc.upsert({"_id": 1, "data": False})
+            data = deepcopy(filter_dict)
+            filter_dict = self.__convert_filter(data.pop("_id"))
+
+        await self.update_by_custom(filter_dict, data, *args, **kwargs)
 
     # <-- Actual Methods -->
     @return_converted
@@ -128,7 +155,7 @@ class Document:
         """
         filter_dict = filter_dict or {}
 
-        return await self.document.find(filter_dict, *args, **kwargs).to_list(None)
+        return await self._document.find(filter_dict, *args, **kwargs).to_list(None)
 
     @return_converted
     async def find_by_id(
@@ -147,7 +174,7 @@ class Document:
         Optional[Union[Dict[str, Any], Type[T]]]
             The result of the query
         """
-        return await self.document.find_one({"_id": data_id})
+        return await self.find_by_custom({"_id": data_id})
 
     @return_converted
     async def find_by_custom(
@@ -168,7 +195,7 @@ class Document:
         """
         self.__ensure_dict(filter_dict)
 
-        return await self.document.find_one(filter_dict)  # type: ignore
+        return await self._document.find_one(filter_dict)
 
     @return_converted
     async def find_many_by_custom(
@@ -190,7 +217,7 @@ class Document:
         """
         self.__ensure_dict(filter_dict)
 
-        return await self.document.find(filter_dict).to_list(None)
+        return await self._document.find(filter_dict).to_list(None)
 
     async def delete_by_id(self, data_id: Any) -> Optional[DeleteResult]:
         """
@@ -204,17 +231,14 @@ class Document:
 
         Returns
         -------
-        Optional[DeleteResult]
+        DeleteResult
             The result of deletion
         """
-        if await self.find_by_id(data_id) is None:
-            return None
-
-        return await self.document.delete_many({"_id": data_id})
+        return await self.delete_by_custom({"_id": data_id})
 
     async def delete_by_custom(
         self, filter_dict: Dict[str, Any]
-    ) -> Optional[Union[List[DeleteResult], DeleteResult]]:
+    ) -> Optional[DeleteResult]:
         """
         Delete an item from the Document
         matching the filter
@@ -227,16 +251,18 @@ class Document:
 
         Returns
         -------
-        Optional[DeleteResult]
+        DeleteResult
             The result of deletion
         """
         self.__ensure_dict(filter_dict)
 
-        return await self.document.delete_many(filter_dict)
+        result: DeleteResult = await self._document.delete_many(filter_dict)
+        result: Optional[DeleteResult] = result if result.deleted_count != 0 else None
+        return result
 
     async def insert(self, data: Dict[str, Any]) -> None:
         """
-        Insert the given data into the document
+        Insert the given data into the _document
 
         Parameters
         ----------
@@ -245,30 +271,45 @@ class Document:
         """
         self.__ensure_dict(data)
 
-        await self.document.insert_one(data)
+        await self._document.insert_one(data)
 
     async def upsert(
-        self, data: Dict[str, Any], option: str = "set", *args: Any, **kwargs: Any
+        self,
+        filter_dict: Union[Dict, Any],
+        data: Dict[str, Any] = None,
+        option: str = "set",
+        *args: Any,
+        **kwargs: Any,
     ) -> None:
         """
         Performs an UPSERT operation,
         so data is either INSERTED or UPDATED
-        based on the current state of the document.
+        based on the current state of the _document.
 
         Parameters
         ----------
+        filter_dict: Union[Dict, Any]
+            The _id of the item to update by,
+            if a Dict is passed that is
+            used as the filter.
         data: Dict[str, Any]
             The data to upsert (filter is _id)
         option: str
             The optional option to pass to mongo,
-
             default is set
-
         """
-        if await self.find_by_id(data["_id"]) is None:
-            return await self.insert(data)
+        # Fairly sure this is no longer needed
+        # if await self.find_by_id(data["_id"]) is None:
+        #     return await self.insert(data)
+        filter_dict = self.__convert_filter(filter_dict)
 
-        await self.update_by_id(data, option, upsert=True, *args, **kwargs)
+        if data is None:
+            # Backwards compat so you can just pass something like
+            # await doc.upsert({"_id": 1, "data": False})
+            data = deepcopy(filter_dict)
+            filter_dict = self.__convert_filter(data.pop("_id"))
+
+        await self.upsert_custom(filter_dict, data, option, *args, **kwargs)
 
     async def update_by_id(
         self, data: Dict[str, Any], option: str = "set", *args: Any, **kwargs: Any
@@ -282,14 +323,19 @@ class Document:
             The data to upsert (filter is _id)
         option: str
             The optional option to pass to mongo,
-
             default is set
+
+        Notes
+        -----
+        If the data doesn't already
+        exist, this makes no changes
+        to the actual database.
         """
         self.__ensure_dict(data)
         self.__ensure_id(data)
 
         data_id = data.pop("_id")
-        await self.document.update_one(
+        await self._document.update_one(
             {"_id": data_id}, {f"${option}": data}, *args, **kwargs
         )
 
@@ -304,8 +350,7 @@ class Document:
         """
         Performs an UPSERT operation,
         so data is either INSERTED or UPDATED
-        based on the current state of the document.
-
+        based on the current state of the _document.
         Uses filter_dict rather then _id
 
         Parameters
@@ -316,13 +361,8 @@ class Document:
             The data to upsert
         option: str
             The optional option to pass to mongo,
-
             default is set
         """
-        if not bool(await self.find_by_custom(filter_dict)):
-            # Insert
-            return await self.insert({**filter_dict, **update_data})
-
         await self.update_by_custom(
             filter_dict, update_data, option, upsert=True, *args, **kwargs
         )
@@ -346,45 +386,49 @@ class Document:
             The data to upsert
         option: str
             The optional option to pass to mongo,
-
             default is set
         """
         self.__ensure_dict(filter_dict)
         self.__ensure_dict(update_data)
 
         # Update
-        await self.document.update_one(
+        await self._document.update_one(
             filter_dict, {f"${option}": update_data}, *args, **kwargs
         )
 
-    async def unset(self, data: Dict[str, Any]) -> None:
+    async def unset(self, _id: Union[Dict, Any], field: Any) -> None:
         """
         Remove a given param, basically dict.pop on the db.
-
         Works based off _id
 
         Parameters
         ----------
-        data: Dict[str, Any]
-            The data
-
-        Notes
-        -----
-        This is one of the least tested parts.
-
+        _id: Any
+            The field's _document id or
+            dict as a filter
+        field: Any
+            The field to remove
         """
-        self.__ensure_dict(data)
-        self.__ensure_id(data)
+        filter_dict = self.__convert_filter(_id)
+        await self.unset_by_custom(filter_dict, field)
 
-        # TODO This might break stuff now removed?
-        # if await self.find_by_id(data["_id"]) is None:
-        #     return
+    async def unset_by_custom(self, filter_dict: Dict[str, Any], field: Any) -> None:
+        """
+        Remove a given param, basically dict.pop on the db.
+        Works based off _id
 
-        data_id = data.pop("_id")
-        await self.document.update_one({"_id": data_id}, {"$unset": data})
+        Parameters
+        ----------
+        filter_dict: Dict[str, Any]
+            The fields to match on (Think _id)
+        field: Any
+            The field to remove
+        """
+        self.__ensure_dict(filter_dict)
+        await self._document.update_one(filter_dict, {"$unset": {field: True}})
 
     async def increment(
-        self, data_id: Any, amount: Union[int, float], field: str
+        self, data_id: Union[Dict, Any], amount: Union[int, float], field: str
     ) -> None:
         """
         Increment a field somewhere.
@@ -392,17 +436,52 @@ class Document:
         Parameters
         ----------
         data_id: Any
-            The _id of the 'thing' we want to increment
+            The fields to match on (Think _id)
         amount: Union[int, float]
             How much to increment (or decrement) by
         field: str
             The key for the field to increment
         """
-        # TODO Test removing this
-        if await self.find_by_id(data_id) is None:
-            return
+        filter_dict = self.__convert_filter(data_id)
 
-        await self.document.update_one({"_id": data_id}, {"$inc": {field: amount}})
+        await self.increment_by_custom(filter_dict, amount, field)
+
+    async def increment_by_custom(
+        self, filter_dict: Dict[Any, Any], amount: Union[int, float], field: str
+    ) -> None:
+        """
+        Increment a field somewhere.
+
+        Parameters
+        ----------
+        filter_dict: Dict[Any, Any]
+            The 'thing' we want to increment
+        amount: Union[int, float]
+            How much to increment (or decrement) by
+        field: str
+            The key for the field to increment
+        """
+        self.__ensure_dict(filter_dict)
+        await self._document.update_one(filter_dict, {"$inc": {field: amount}})
+
+    async def update_field_to(
+        self, filter_dict: Union[Dict[Any, Any], Any], field: str, new_value: Any
+    ) -> None:
+        """
+        Modify a single field and change the value
+
+        Parameters
+        ----------
+        filter_dict: Union[Dict[Any, Any], Any]
+            The _id of the 'thing' we want to increment
+        field: str
+            The key for the field to increment
+        new_value: Any
+            What the field should get changed to
+        """
+        filter_dict = self.__convert_filter(filter_dict)
+        self.__ensure_dict(filter_dict)
+        await self._document.update_one(filter_dict, {"$set": {field: new_value}})
 
     # <-- Private methods -->
     @staticmethod
@@ -413,6 +492,11 @@ class Document:
     def __ensure_id(data: Dict[str, Any]) -> None:
         assert "_id" in data
 
+    @staticmethod
+    def __convert_filter(data: Union[Dict, Any]) -> Dict:
+        return data if isinstance(data, dict) else {"_id": data}
+
+    # <-- Some basic internals -->
     @property
     def document_name(self) -> str:
         return self._document_name
