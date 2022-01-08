@@ -1,6 +1,8 @@
 import asyncio
 from typing import Optional
 
+import nextcord
+
 try:
     import nextcord as discord
 except ModuleNotFoundError:
@@ -116,7 +118,8 @@ class Meta:
         if color:
             embed.colour = color
 
-        if contain_timestamp and not isinstance(self, channel.WrappedChannel):
+        if contain_timestamp and isinstance(self, BotContext):
+            # Doesnt work on Channels, Users, Members
             embed.timestamp = self.message.created_at
 
         if include_command_invoker and not isinstance(self, channel.WrappedChannel):
@@ -152,7 +155,7 @@ class Meta:
                 description=description,
             )
         else:
-            raise RuntimeError("Expected atleast title or description")
+            raise RuntimeError("Expected at-least title or description")
 
         sent = await self.send(embed=embed)
         val = None
