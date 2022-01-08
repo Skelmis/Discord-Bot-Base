@@ -46,8 +46,6 @@ class Meta:
 
         Taken from R.Danny
         """
-        if not self.channel.permissions_for(self.me).add_reactions:
-            raise RuntimeError("Bot does not have Add Reactions permission.")
         fmt = f"{message}\n\nReact with \N{WHITE HEAVY CHECK MARK} to confirm or \N{CROSS MARK} to deny."
 
         # Ensure we can gather author id
