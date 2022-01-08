@@ -154,10 +154,8 @@ class BotBase(commands.Bot):
                 print(f"{original.__class__.__name__}: {original}", file=sys.stderr)
         elif isinstance(error, commands.ArgumentParsingError):
             await ctx.send(error)
-        elif isinstance(error, commands.PrivateMessageOnly):
-            await ctx.send("This command can only be used in dm's.")
-        elif isinstance(error, commands.NoPrivateMessage):
-            await ctx.send("This command can only be used in Guilds.")
+        elif isinstance(error, commands.NotOwner):
+            await ctx.send("You do not have permissions to run this command.")
         elif isinstance(error, BlacklistedEntry):
             await ctx.send(error.message)
 
