@@ -1,6 +1,8 @@
 import asyncio
 from typing import Optional
 
+import nextcord
+
 try:
     import nextcord as discord
 except ModuleNotFoundError:
@@ -46,8 +48,6 @@ class Meta:
 
         Taken from R.Danny
         """
-        if not self.channel.permissions_for(self.me).add_reactions:
-            raise RuntimeError("Bot does not have Add Reactions permission.")
         fmt = f"{message}\n\nReact with \N{WHITE HEAVY CHECK MARK} to confirm or \N{CROSS MARK} to deny."
 
         # Ensure we can gather author id
@@ -118,7 +118,8 @@ class Meta:
         if color:
             embed.colour = color
 
-        if contain_timestamp and not isinstance(self, channel.WrappedChannel):
+        if contain_timestamp and isinstance(self, BotContext):
+            # Doesnt work on Channels, Users, Members
             embed.timestamp = self.message.created_at
 
         if include_command_invoker and not isinstance(self, channel.WrappedChannel):
