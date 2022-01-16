@@ -16,6 +16,7 @@ class TimedCache(Cache):
         try:
             entry = self.cache[item]
             if entry.expiry_time < datetime.now():
+                self.delete_entry(item)
                 return False
         except KeyError:
             return False
