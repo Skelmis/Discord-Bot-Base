@@ -211,11 +211,12 @@ class BotBase(commands.Bot):
             log.debug(f"Ignoring blacklisted guild: {ctx.guild.id}")
             raise BlacklistedEntry(f"Ignoring blacklisted guild: {ctx.guild.id}")
 
-        log.debug(
-            "Invoked command %s for User(id=%s)",
-            ctx.command.qualified_name,
-            ctx.author.id,
-        )
+        if ctx.command:
+            log.debug(
+                "Invoked command %s for User(id=%s)",
+                ctx.command.qualified_name,
+                ctx.author.id,
+            )
 
         await self.invoke(ctx)
 
