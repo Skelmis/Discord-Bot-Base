@@ -21,6 +21,7 @@ class Meta:
 
     def __getattr__(self, item):
         """Anything not found within Meta should be returned from wrapped item itself"""
+        print(item, type(item))
         return getattr(self._wrapped_item, item)
 
     # @property
