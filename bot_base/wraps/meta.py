@@ -16,15 +16,11 @@ class Meta:
     """
 
     def __init__(self, wrapped_item, bot: "BotBase"):
-        if isinstance(wrapped_item, type(self)):
-            wrapped_item = wrapped_item._wrapped_item
-
         self._wrapped_item = wrapped_item
         self._wrapped_bot = bot
 
-    def __getattr__(self, item):
-        """Anything not found within Meta should be returned from wrapped item itself"""
-        return getattr(self._wrapped_item, item)
+        if isinstance(wrapped_item, type(self)):
+            self._wrapped_item = wrapped_item._wrapped_item
 
     # @property
     # def __class__(self):
