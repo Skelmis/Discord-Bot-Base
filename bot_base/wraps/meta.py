@@ -2,6 +2,7 @@ import asyncio
 from typing import Optional, TYPE_CHECKING, Any
 
 import nextcord
+from nextcord.abc import MISSING
 
 from . import channel
 
@@ -21,6 +22,13 @@ class Meta:
 
         if isinstance(wrapped_item, type(self)):
             self._wrapped_item = wrapped_item._wrapped_item
+
+    def __getattr__(self, item):
+        attr = getattr(item, self._wrapped_item, MISSING)
+        if attr is MISSING:
+            raise AttributeError(item)
+
+        return attr
 
     # @property
     # def __class__(self):
