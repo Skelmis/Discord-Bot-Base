@@ -305,7 +305,7 @@ class BotBase(commands.Bot):
             wrapped_first_arg, wrapped_second_arg = self._double_event_type_sheet[
                 _name
             ](args[0], args[1])
-            super().dispatch(wrapped_first_arg, wrapped_second_arg, self)
+            super().dispatch(event_name, wrapped_first_arg, wrapped_second_arg, self)
 
         else:
             super().dispatch(event_name, *args, **kwargs)  # type: ignore
