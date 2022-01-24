@@ -135,7 +135,7 @@ class Meta:
         contain_timestamp: bool = True,
         include_command_invoker: bool = True,
         **kwargs,
-    ) -> discord.Message:
+    ) -> nextcord.Message:
         """Wraps a string to send formatted as an embed"""
         from bot_base.context import BotContext
 
@@ -147,7 +147,7 @@ class Meta:
             else self  # Anything else (member.send)
         )
 
-        embed = discord.Embed(description=desc)
+        embed = nextcord.Embed(description=desc)
 
         if color:
             embed.colour = color
@@ -166,7 +166,7 @@ class Meta:
 
             embed.set_footer(text=text, icon_url=icon_url)
 
-        if reply and isinstance(target, discord.Message):
+        if reply and isinstance(target, nextcord.Message):
             return await target.reply(embed=embed, **kwargs)
         else:
             return await target.send(embed=embed, **kwargs)
@@ -181,15 +181,15 @@ class Meta:
         author_id=None,
     ) -> Optional[str]:
         if title and not description:
-            embed = discord.Embed(
+            embed = nextcord.Embed(
                 title=title,
             )
         elif not title and description:
-            embed = discord.Embed(
+            embed = nextcord.Embed(
                 description=description,
             )
         elif title and description:
-            embed = discord.Embed(
+            embed = nextcord.Embed(
                 title=title,
                 description=description,
             )
