@@ -1,7 +1,5 @@
 import asyncio
-from typing import Optional, TYPE_CHECKING
-
-import nextcord
+from typing import Optional, TYPE_CHECKING, Any
 
 from . import channel
 
