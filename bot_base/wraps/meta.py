@@ -24,7 +24,7 @@ class Meta:
             self._wrapped_item = wrapped_item._wrapped_item
 
     def __getattr__(self, item):
-        attr = getattr(item, self._wrapped_item, MISSING)
+        attr = getattr(self._wrapped_item, item, MISSING)
         if attr is MISSING:
             raise AttributeError(item)
 
