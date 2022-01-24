@@ -1,13 +1,14 @@
 import asyncio
 from typing import Optional, TYPE_CHECKING, Any
 
+import nextcord
+
 from . import channel
 
 if TYPE_CHECKING:
     from bot_base import BotBase
 
 
-# noinspection PyUnresolvedReferences
 class Meta:
     """
     Used to inject functionality into multiple
