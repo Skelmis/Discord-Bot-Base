@@ -123,9 +123,14 @@ class Meta:
             embed.timestamp = self.message.created_at
 
         if include_command_invoker and not isinstance(self, channel.WrappedChannel):
-            embed.set_footer(
-                text=self.author.display_name, icon_url=self.author.avatar.url
-            )
+            try:
+                text = self.author.display_name
+                icon_url = self.author.avatar.url
+            except AttributeError:
+                text = self.display_name
+                icon_url = self.avatar.url
+
+            embed.set_footer(text=text, icon_url=icon_url)
 
         if reply and isinstance(target, discord.Message):
             return await target.reply(embed=embed, **kwargs)

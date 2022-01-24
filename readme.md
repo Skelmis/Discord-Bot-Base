@@ -15,3 +15,8 @@ Basic embed:
 
 ![Example image](./images/image_one.png)
 
+### Disclaimer
+
+I am fine with this being used for personal/private usage. 
+However, I am not fine with other people using this for things such as tutorials, etc, without first contacting me and getting approval. Don't be that guy.
+
