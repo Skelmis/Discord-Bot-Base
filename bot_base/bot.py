@@ -2,21 +2,15 @@ import datetime
 import sys
 import logging
 import traceback
-import warnings
-from typing import Optional, List, Any, Dict, Type, Union
+from typing import Optional, List, Any, Dict, Type, Union, Callable
 
 import humanize
 
 from bot_base.caches import TimedCache
 
-try:
-    import nextcord as discord
-    from nextcord import DiscordException
-    from nextcord.ext import commands
-except ModuleNotFoundError:
-    import discord
-    from discord import DiscordException
-    from discord.ext import commands
+import nextcord
+from nextcord import DiscordException, abc
+from nextcord.ext import commands
 
 from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
@@ -26,21 +20,17 @@ from bot_base.wraps import (
     WrappedChannel,
     WrappedMember,
     WrappedUser,
+    WrappedThread,
 )
 
 log = logging.getLogger(__name__)
 
-try:
-    from nextcord.ext.commands.converter import CONVERTER_MAPPING
 
-    CONVERTER_MAPPING[discord.User] = WrappedUser
-    CONVERTER_MAPPING[discord.Member] = WrappedMember
-    CONVERTER_MAPPING[discord.TextChannel] = WrappedChannel
-except ModuleNotFoundError:
-    warnings.warn(
-        "You don't have overridden converters. "
-        "Please open an issue and name the fork your using if you want them."
-    )
+from nextcord.ext.commands.converter import CONVERTER_MAPPING
+
+CONVERTER_MAPPING[nextcord.User] = WrappedUser
+CONVERTER_MAPPING[nextcord.Member] = WrappedMember
+CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannel
 
 
 class BotBase(commands.Bot):
@@ -65,12 +55,16 @@ class BotBase(commands.Bot):
         if kwargs.pop("load_builtin_commands", None):
             self.load_extension("bot_base.cogs.internal")
 
-        self._event_type_sheet: Dict[
-            str,
-            Type[
-                Union[WrappedChannel, WrappedMember, WrappedUser],
-            ],
-        ] = {}
+        # These events do include the on_ prefix
+        self._single_event_type_sheet: Dict[str, Callable] = {
+            "on_message": self.get_wrapped_message,
+        }
+        self._double_event_type_sheet: Dict[str, Callable] = {
+            "on_message_edit": lambda _args: (
+                self.get_wrapped_message(_args[0]),
+                self.get_wrapped_message(_args[1]),
+            )
+        }
 
     @property
     def uptime(self) -> datetime.datetime:
@@ -85,7 +79,7 @@ class BotBase(commands.Bot):
         await self.blacklist.initialize()
 
     async def get_command_prefix(
-        self, bot: "BotBase", message: discord.Message
+        self, bot: "BotBase", message: nextcord.Message
     ) -> List[str]:
         try:
             prefix = await self.get_guild_prefix(guild_id=message.guild.id)
@@ -155,7 +149,7 @@ class BotBase(commands.Bot):
             await ctx.author.send("Sorry. This command is disabled and cannot be used.")
         elif isinstance(error, commands.CommandInvokeError):
             original = error.original
-            if not isinstance(original, discord.HTTPException):
+            if not isinstance(original, nextcord.HTTPException):
                 print(f"In {ctx.command.qualified_name}:", file=sys.stderr)
                 traceback.print_tb(original.__traceback__)
                 print(f"{original.__class__.__name__}: {original}", file=sys.stderr)
@@ -201,12 +195,12 @@ class BotBase(commands.Bot):
             )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
-    async def on_guild_join(self, guild: discord.Guild) -> None:
+    async def on_guild_join(self, guild: nextcord.Guild) -> None:
         if guild.id in self.blacklist.guilds:
             log.info("Leaving blacklisted Guild(id=%s)", guild.id)
             await guild.leave()
 
-    async def process_commands(self, message: discord.Message) -> None:
+    async def process_commands(self, message: nextcord.Message) -> None:
         ctx = await self.get_context(message, cls=BotContext)
 
         if ctx.author.id in self.blacklist.users:
@@ -225,7 +219,7 @@ class BotBase(commands.Bot):
 
         await self.invoke(ctx)
 
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self, message: nextcord.Message) -> None:
         if message.author.bot:
             log.debug("Ignoring a message from a bot.")
             return
@@ -246,12 +240,12 @@ class BotBase(commands.Bot):
         """Looks up a channel in cache or fetches if not found."""
         channel = self.get_channel(channel_id)
         if channel:
-            return WrappedChannel(channel, bot=self)
+            return self.get_wrapped_channel(channel)
 
         channel = await self.fetch_channel(channel_id)
-        return WrappedChannel(channel, bot=self)
+        return self.get_wrapped_channel(channel)
 
-    async def get_or_fetch_guild(self, guild_id: int) -> discord.Guild:
+    async def get_or_fetch_guild(self, guild_id: int) -> nextcord.Guild:
         """Looks up a guild in cache or fetches if not found."""
         guild = self.get_guild(guild_id)
         if guild:
@@ -269,11 +263,48 @@ class BotBase(commands.Bot):
         user = await self.fetch_user(user_id)
         return WrappedUser(user, bot=self)
 
+    def get_wrapped_channel(
+        self,
+        channel: Union[abc.GuildChannel, abc.PrivateChannel, nextcord.Thread],
+    ) -> Union[WrappedThread, WrappedChannel]:
+        if isinstance(channel, nextcord.Thread):
+            return WrappedThread(channel, self)
+
+        return WrappedChannel(channel, self)
+
+    def get_wrapped_person(
+        self, person: Union[nextcord.User, nextcord.Member]
+    ) -> Union[WrappedUser, WrappedMember]:
+        if isinstance(person, nextcord.Member):
+            return WrappedMember(person, self)
+
+        return WrappedUser(person, self)
+
+    def get_wrapped_message(self, message: nextcord.Message) -> nextcord.Message:
+        """
+        Wrap the relevant params in message with meta classes.
+
+        These fields are:
+        message.channel: Union[WrappedThread, WrappedChannel]
+        message.author: Union[WrappedUser, WrappedMember]
+        """
+        message.channel = self.get_wrapped_channel(message.channel)
+        message.author = self.get_wrapped_person(message.author)
+
+        return message
+
     async def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
+        _name = f"on_{event_name}"
         # If we know the event, dispatch the wrapped one
-        if event_name in self._event_type_sheet:
-            wrapped_arg = self._event_type_sheet[event_name](args[0], bot=self)
+        if _name in self._single_event_type_sheet:
+            wrapped_arg = self._single_event_type_sheet[_name](args[0])
             await super().dispatch(event_name, wrapped_arg)  # type: ignore
+
+        elif _name in self._double_event_type_sheet:
+            wrapped_first_arg, wrapped_second_arg = self._double_event_type_sheet[
+                _name
+            ](args[0], args[1])
+            super().dispatch(wrapped_first_arg, wrapped_second_arg, self)
 
         else:
             await super().dispatch(event_name, *args, **kwargs)  # type: ignore

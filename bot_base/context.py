@@ -1,19 +1,17 @@
-try:
-    from nextcord.ext import commands
-except ModuleNotFoundError:
-    from discord.ext import commands
+from typing import TYPE_CHECKING
 
-from bot_base.wraps import Meta, WrappedChannel, WrappedMember, WrappedUser
+from nextcord.ext import commands
+
+from bot_base.wraps import Meta
+
+if TYPE_CHECKING:
+    from bot_base import BotBase
 
 
 class BotContext(commands.Context, Meta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._bot = self.bot
+        bot: "BotBase" = self.bot
+        self._bot = bot
 
-        self.message.channel = WrappedChannel(self.message.channel, bot=self.bot)
-
-        if not self.guild:
-            self.message.author = WrappedUser(self.message.author, bot=self.bot)
-        else:
-            self.message.author = WrappedMember(self.message.author, bot=self.bot)
+        self.message = bot.get_wrapped_message(self.message)
