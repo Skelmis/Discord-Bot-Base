@@ -3,7 +3,7 @@ import sys
 import logging
 import traceback
 import warnings
-from typing import Optional, List
+from typing import Optional, List, Any, Dict, Type, Union
 
 import humanize
 
@@ -64,6 +64,13 @@ class BotBase(commands.Bot):
 
         if kwargs.pop("load_builtin_commands", None):
             self.load_extension("bot_base.cogs.internal")
+
+        self._event_type_sheet: Dict[
+            str,
+            Type[
+                Union[WrappedChannel, WrappedMember, WrappedUser],
+            ],
+        ] = {}
 
     @property
     def uptime(self) -> datetime.datetime:
@@ -261,3 +268,12 @@ class BotBase(commands.Bot):
 
         user = await self.fetch_user(user_id)
         return WrappedUser(user, bot=self)
+
+    async def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
+        # If we know the event, dispatch the wrapped one
+        if event_name in self._event_type_sheet:
+            wrapped_arg = self._event_type_sheet[event_name](args[0], bot=self)
+            await super().dispatch(event_name, wrapped_arg)  # type: ignore
+
+        else:
+            await super().dispatch(event_name, *args, **kwargs)  # type: ignore
