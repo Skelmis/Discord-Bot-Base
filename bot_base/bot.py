@@ -293,7 +293,7 @@ class BotBase(commands.Bot):
 
         return message
 
-    async def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
+    def dispatch(self, event_name: str, *args: Any, **kwargs: Any) -> None:
         _name = f"on_{event_name}"
         # If we know the event, dispatch the wrapped one
         if _name in self._single_event_type_sheet:
