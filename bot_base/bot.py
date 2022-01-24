@@ -60,9 +60,9 @@ class BotBase(commands.Bot):
             "on_message": self.get_wrapped_message,
         }
         self._double_event_type_sheet: Dict[str, Callable] = {
-            "on_message_edit": lambda _args: (
-                self.get_wrapped_message(_args[0]),
-                self.get_wrapped_message(_args[1]),
+            "on_message_edit": lambda before, after: (
+                self.get_wrapped_message(before),
+                self.get_wrapped_message(after),
             )
         }
 
