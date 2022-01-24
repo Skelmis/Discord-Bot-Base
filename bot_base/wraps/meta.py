@@ -16,6 +16,9 @@ class Meta:
     """
 
     def __init__(self, wrapped_item, bot: "BotBase"):
+        if isinstance(wrapped_item, type(self)):
+            wrapped_item = wrapped_item._wrapped_item
+
         self._wrapped_item = wrapped_item
         self._wrapped_bot = bot
 
