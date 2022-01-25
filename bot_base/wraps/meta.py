@@ -7,7 +7,7 @@ from nextcord.abc import MISSING
 from . import channel
 
 if TYPE_CHECKING:
-    from bot_base import BotBase
+    from bot_base import BotBase, BotContext
 
 
 class Meta:
@@ -124,7 +124,9 @@ class Meta:
         for emoji in ("\N{WHITE HEAVY CHECK MARK}", "\N{CROSS MARK}"):
             await msg.add_reaction(emoji)
         try:
-            await self._bot.wait_for("raw_reaction_add", check=check, timeout=timeout)
+            await self._wrapped_bot.wait_for(
+                "raw_reaction_add", check=check, timeout=timeout
+            )
         except asyncio.TimeoutError:
             confirm = None
         try:
@@ -220,11 +222,21 @@ class Meta:
             author_id = self.id
 
         try:
-            msg = await self._bot.wait_for(
-                "message",
-                timeout=timeout,
-                check=lambda message: message.author.id == author_id,
-            )
+            if issubclass(type(self), (channel.WrappedChannel, BotContext)):
+                msg = await self._wrapped_bot.wait_for(
+                    "message",
+                    timeout=timeout,
+                    check=lambda message: message.author.id == author_id
+                    and message.channel.id == self.id,
+                )
+            else:
+                msg = await self._wrapped_bot.wait_for(
+                    "message",
+                    timeout=timeout,
+                    check=lambda message: message.author.id == author_id
+                    and not message.guild,
+                )
+
             if msg:
                 val = msg.content
         except asyncio.TimeoutError:
