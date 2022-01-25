@@ -3,7 +3,6 @@ from typing import Optional, TYPE_CHECKING, Any
 
 import nextcord
 
-from bot_base.context import BotContext
 from . import channel
 
 if TYPE_CHECKING:
@@ -190,6 +189,8 @@ class Meta:
         delete_after: bool = True,
         author_id=None,
     ) -> Optional[str]:
+        from bot_base.context import BotContext
+
         if title and not description:
             embed = nextcord.Embed(
                 title=title,
