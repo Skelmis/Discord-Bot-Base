@@ -13,3 +13,6 @@ class WrappedMember(Meta, nextcord.Member):
             ctx=ctx, argument=argument
         )
         return cls(member, ctx.bot)
+
+    def __getattr__(self, item):
+        return getattr(self._wrapped_item, item)

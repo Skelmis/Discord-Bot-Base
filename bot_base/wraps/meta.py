@@ -23,12 +23,12 @@ class Meta:
         if isinstance(wrapped_item, type(self)):
             self._wrapped_item = wrapped_item._wrapped_item
 
-    def __getattr__(self, item):
-        attr = getattr(self._wrapped_item, item, MISSING)
-        if attr is MISSING:
-            raise AttributeError(item)
-
-        return attr
+    # def __getattr__(self, item):
+    #     attr = getattr(self._wrapped_item, item, MISSING)
+    #     if attr is MISSING:
+    #         raise AttributeError(item)
+    #
+    #     return attr
 
     # @property
     # def __class__(self):

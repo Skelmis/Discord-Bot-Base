@@ -11,3 +11,6 @@ class WrappedThread(Meta, nextcord.Thread):
             ctx=ctx, argument=argument
         )
         return cls(_meta, ctx.bot)
+
+    def __getattr__(self, item):
+        return getattr(self._wrapped_item, item)

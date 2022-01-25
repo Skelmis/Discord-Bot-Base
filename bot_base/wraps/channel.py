@@ -15,3 +15,6 @@ class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):  # noqa
             abc.GuildChannel, abc.PrivateChannel
         ] = await commands.TextChannelConverter().convert(ctx=ctx, argument=argument)
         return cls(channel, ctx.bot)
+
+    def __getattr__(self, item):
+        return getattr(self._wrapped_item, item)

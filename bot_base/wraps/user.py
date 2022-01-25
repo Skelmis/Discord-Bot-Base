@@ -13,3 +13,6 @@ class WrappedUser(Meta, nextcord.User):
             ctx=ctx, argument=argument
         )
         return cls(user, ctx.bot)
+
+    def __getattr__(self, item):
+        return getattr(self._wrapped_item, item)
