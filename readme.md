@@ -4,8 +4,8 @@
 A subclass of `commands.Bot` which implements the following features
 and reduces the boilerplate between discord bots.
 
-This should support all discord.py 2.x.x forks, however it is only tested
-against Nextcord.
+This supports Nextcord, if you wish to use this with Disnake please express interest and I can see what to do.
+Pycord has no pypi releases so don't ask, this is a 2.x.x template.
 
 [https://pypi.org/project/Bot-Base/](https://pypi.org/project/Bot-Base/)
 

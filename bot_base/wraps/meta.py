@@ -1,22 +1,64 @@
 import asyncio
-from typing import Optional
+from typing import Optional, TYPE_CHECKING, Any
 
 import nextcord
-
-try:
-    import nextcord as discord
-except ModuleNotFoundError:
-    import discord
+from nextcord.abc import MISSING
 
 from . import channel
 
+if TYPE_CHECKING:
+    from bot_base import BotBase
 
-# noinspection PyUnresolvedReferences
+
 class Meta:
     """
     Used to inject functionality into multiple
     class's and reduce code duplication
     """
+
+    def __init__(self, wrapped_item, bot: "BotBase"):
+        self._wrapped_item = wrapped_item
+        self._wrapped_bot = bot
+
+        if isinstance(wrapped_item, type(self)):
+            self._wrapped_item = wrapped_item._wrapped_item
+
+    def __getattr__(self, item):
+        attr = getattr(self._wrapped_item, item, MISSING)
+        if attr is MISSING:
+            raise AttributeError(item)
+
+        return attr
+
+    # @property
+    # def __class__(self):
+    #     return type(self._wrapped_item)
+
+    def __instancecheck__(self, instance):
+        return isinstance(instance, type(self._wrapped_item))
+
+    def __subclasscheck__(self, subclass):
+        return issubclass(subclass, self._wrapped_item)
+
+    def __eq__(self, other: Any) -> bool:
+        """
+        If other is not of this type, or the type
+        we wrap its False.
+        If other is not us, but what we wrap then
+        compare them as applicable.
+        If other is same type as us, compare
+        what we both wrap.
+        """
+        if not isinstance(other, (type(self._wrapped_item), type(self))):
+            return False
+
+        if isinstance(other, type(self._wrapped_item)):
+            return other.id == self._wrapped_item.id
+
+        return other._wrapped_item.id == self._wrapped_item.id
+
+    def __hash__(self):
+        return hash(self._wrapped_item)
 
     async def prompt(
         self,
@@ -101,7 +143,7 @@ class Meta:
         contain_timestamp: bool = True,
         include_command_invoker: bool = True,
         **kwargs,
-    ) -> discord.Message:
+    ) -> nextcord.Message:
         """Wraps a string to send formatted as an embed"""
         from bot_base.context import BotContext
 
@@ -113,7 +155,7 @@ class Meta:
             else self  # Anything else (member.send)
         )
 
-        embed = discord.Embed(description=desc)
+        embed = nextcord.Embed(description=desc)
 
         if color:
             embed.colour = color
@@ -132,7 +174,7 @@ class Meta:
 
             embed.set_footer(text=text, icon_url=icon_url)
 
-        if reply and isinstance(target, discord.Message):
+        if reply and isinstance(target, nextcord.Message):
             return await target.reply(embed=embed, **kwargs)
         else:
             return await target.send(embed=embed, **kwargs)
@@ -147,15 +189,15 @@ class Meta:
         author_id=None,
     ) -> Optional[str]:
         if title and not description:
-            embed = discord.Embed(
+            embed = nextcord.Embed(
                 title=title,
             )
         elif not title and description:
-            embed = discord.Embed(
+            embed = nextcord.Embed(
                 description=description,
             )
         elif title and description:
-            embed = discord.Embed(
+            embed = nextcord.Embed(
                 title=title,
                 description=description,
             )
