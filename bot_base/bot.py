@@ -269,8 +269,7 @@ class BotBase(commands.Bot):
         channel: Union[abc.GuildChannel, abc.PrivateChannel, nextcord.Thread],
     ) -> Union[WrappedThread, WrappedChannel]:
         if isinstance(channel, nextcord.Thread):
-            return channel
-            # return WrappedThread(channel, self)
+            return WrappedThread(channel, self)
 
         return WrappedChannel(channel, self)
 
