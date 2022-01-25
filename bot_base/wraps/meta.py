@@ -2,12 +2,12 @@ import asyncio
 from typing import Optional, TYPE_CHECKING, Any
 
 import nextcord
-from nextcord.abc import MISSING
 
+from bot_base.context import BotContext
 from . import channel
 
 if TYPE_CHECKING:
-    from bot_base import BotBase, BotContext
+    from bot_base import BotBase
 
 
 class Meta:
