@@ -11,7 +11,6 @@ bot = BotBase(
     mongo_url=os.environ["MONGO_URL"],
     mongo_database_name="my_bot",
     load_builtin_commands=True,
-    leave_db=True,
 )
 
 
