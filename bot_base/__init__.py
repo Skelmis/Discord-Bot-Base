@@ -5,11 +5,11 @@ from .bot import BotBase
 from .context import BotContext
 from .exceptions import *
 
-__version__ = "1.3.15"
+__version__ = "1.3.16"
 
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
 version_info = VersionInfo(
-    major=1, minor=3, micro=15, releaselevel="production", serial=0
+    major=1, minor=3, micro=16, releaselevel="production", serial=0
 )
