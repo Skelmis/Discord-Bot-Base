@@ -41,7 +41,15 @@ class BotBase(commands.Bot):
                 kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
             )
 
-        self.blacklist: BlacklistManager = BlacklistManager(self.db)
+        try:
+            self.blacklist: BlacklistManager = BlacklistManager(self.db)
+        except AttributeError:
+            log.warning(
+                "You do not have a blacklist setup. "
+                "Please set `self.db` to a subclass of MongoManager before calling "
+                "super().__init__(..., leave_db=True) if you wish to have a blacklist."
+            )
+
         self._uptime: datetime.datetime = datetime.datetime.now(
             tz=datetime.timezone.utc
         )

@@ -19,6 +19,13 @@ class Internal(commands.Cog):
     def __init__(self, bot):
         self.bot: BotBase = bot
 
+    def cog_check(self, ctx) -> bool:
+        try:
+            _exists = self.bot.blacklist
+            return True
+        except AttributeError:
+            return False
+
     @commands.Cog.listener()
     async def on_ready(self):
         log.info(f"{self.__class__.__name__}: Ready")
