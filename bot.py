@@ -4,14 +4,15 @@ import os
 
 from bot_base import BotBase
 
+logging.basicConfig(level=logging.INFO)
+
 bot = BotBase(
     command_prefix="t.",
     mongo_url=os.environ["MONGO_URL"],
     mongo_database_name="my_bot",
     load_builtin_commands=True,
+    leave_db=True,
 )
-
-logging.basicConfig(level=logging.INFO)
 
 
 @bot.event

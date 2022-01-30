@@ -46,8 +46,8 @@ class BotBase(commands.Bot):
         except AttributeError:
             log.warning(
                 "You do not have a blacklist setup. "
-                "Please set `self.db` to a subclass of MongoManager before calling "
-                "super().__init__(..., leave_db=True) if you wish to have a blacklist."
+                "Please set `self.db` to a instance/subclass of MongoManager before "
+                "calling (..., leave_db=True) if you wish to have a blacklist."
             )
 
         self._uptime: datetime.datetime = datetime.datetime.now(
