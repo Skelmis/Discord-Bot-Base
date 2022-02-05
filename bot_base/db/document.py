@@ -161,6 +161,35 @@ class Document:
         return await self._document.find(filter_dict, *args, **kwargs).to_list(None)
 
     @return_converted
+    async def get_all_where_field_exists(
+        self, field: Any, where_field_doesnt_exist: bool = False
+    ) -> List[Optional[Union[Dict[str, Any], Type[T]]]]:
+        """
+        Return all of the documents which
+        contain the key given by `field`
+
+        Parameters
+        ----------
+        field: Any
+            The field to match by
+        where_field_doesnt_exist: bool, Optional
+            If this is ``True``, then this method
+            will return all the documents without
+            the key denoted by `field`.
+
+            Essentially the opposite of whats documented
+            in the main doc description.
+
+            Defaults to ``False``
+
+        Returns
+        -------
+
+        """
+        existence = not where_field_doesnt_exist
+        return await self._document.find({field: {"$exists": existence}}).to_list(None)
+
+    @return_converted
     async def find_by_id(
         self, data_id: Any
     ) -> Optional[Union[Dict[str, Any], Type[T]]]:
