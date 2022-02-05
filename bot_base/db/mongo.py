@@ -52,8 +52,8 @@ class MongoManager:
         """
         documents: List[Document] = self.get_current_documents()
 
-        today: str = datetime.datetime.utcnow().strftime("%I:%M:%S_%p__%d_%m_%Y")
-        backup_db = self.__mongo[f"backup-{today}"]
+        epoch: str = str(datetime.datetime.utcnow().timestamp())
+        backup_db = self.__mongo[f"backup-{epoch}"]
 
         for document in documents:
             backup_doc: Document = Document(backup_db, document.document_name)
