@@ -1,9 +1,12 @@
 import datetime
+import logging
 from typing import List, Dict
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from bot_base.db.document import Document
+
+log = logging.getLogger(__name__)
 
 
 class MongoManager:
@@ -52,10 +55,15 @@ class MongoManager:
         """
         documents: List[Document] = self.get_current_documents()
 
-        epoch: str = str(datetime.datetime.utcnow().timestamp())
-        backup_db = self.__mongo[f"backup-{epoch}"]
+        epoch: str = str(round(datetime.datetime.utcnow().timestamp()))
+        name = f"backup-{epoch}"
+        backup_db = self.__mongo[name]
+        log.info("Backing up the database, this backup is '%s'", name)
 
         for document in documents:
             backup_doc: Document = Document(backup_db, document.document_name)
             all_data: List[Dict] = await document.get_all()
+            if not all_data:
+                continue
+
             await backup_doc.bulk_insert(all_data)
