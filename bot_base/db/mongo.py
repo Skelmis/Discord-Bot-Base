@@ -58,5 +58,4 @@ class MongoManager:
         for document in documents:
             backup_doc: Document = Document(backup_db, document.document_name)
             all_data: List[Dict] = await document.get_all()
-            for entry in all_data:
-                await backup_doc.upsert(entry)
+            await backup_doc.bulk_insert(all_data)

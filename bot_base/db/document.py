@@ -486,7 +486,25 @@ class Document:
         self.__ensure_dict(filter_dict)
         await self._document.update_one(filter_dict, {"$set": {field: new_value}})
 
+    async def bulk_insert(self, data: List[Dict]) -> None:
+        """
+        Given a List of Dictionaries, bulk insert all of
+        the given dictionaries in a single call.
+
+        Parameters
+        ----------
+        data: List[Dict]
+            The data to bulk insert
+        """
+        self.__ensure_list_of_dicts(data)
+        await self._document.insert_many(data)
+
     # <-- Private methods -->
+    @staticmethod
+    def __ensure_list_of_dicts(data: List[Dict]):
+        assert isinstance(data, list)
+        assert all(isinstance(entry, dict) for entry in data)
+
     @staticmethod
     def __ensure_dict(data: Dict[str, Any]) -> None:
         assert isinstance(data, dict)
