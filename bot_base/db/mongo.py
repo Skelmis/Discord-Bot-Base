@@ -1,3 +1,6 @@
+import datetime
+from typing import List, Dict
+
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from bot_base.db.document import Document
@@ -5,10 +8,14 @@ from bot_base.db.document import Document
 
 class MongoManager:
     def __init__(self, connection_url, database_name=None):
-        database_name = database_name or "production"
+        self.database_name = database_name or "production"
 
         self.__mongo = AsyncIOMotorClient(connection_url)
-        self.db = self.__mongo[database_name]
+        self.db = self.__mongo[self.database_name]
+
+        # Documents
+        self.user_blacklist = Document(self.db, "user_blacklist")
+        self.guild_blacklist = Document(self.db, "guild_blacklist")
 
     def typed_lookup(self, attr: str) -> Document:
         return getattr(self, attr)
@@ -29,3 +36,27 @@ class MongoManager:
         setattr(self, item, doc)
 
         return doc
+
+    def get_current_documents(self) -> List[Document]:
+        class_vars = vars(self)
+        documents = []
+        for v in class_vars.values():
+            if isinstance(v, Document):
+                documents.append(v)
+
+        return documents
+
+    async def run_backup(self):
+        """
+        Backs up the database within the same cluster.
+        """
+        documents: List[Document] = self.get_current_documents()
+
+        today: str = datetime.datetime.utcnow().strftime("%I:%M:%S_%p__%d/%m/%Y")
+        backup_db = self.__mongo[today]
+
+        for document in documents:
+            backup_doc: Document = Document(backup_db, document.document_name)
+            all_data: List[Dict] = await document.get_all()
+            for entry in all_data:
+                await backup_doc.upsert(entry)

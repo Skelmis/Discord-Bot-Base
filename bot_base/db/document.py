@@ -37,7 +37,7 @@ def return_converted(func):
 
 
 class Document:
-    _version = 9
+    _version = 9.1
 
     def __init__(
         self,
@@ -62,6 +62,9 @@ class Document:
         self._document: AsyncIOMotorCollection = database[document_name]
 
         self.converter: Type[T] = converter
+
+    def __repr__(self):
+        return f"<Document(document_name={self.document_name})>"
 
     # <-- Pointer Methods -->
     async def find(
