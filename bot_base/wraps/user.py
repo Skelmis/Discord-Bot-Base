@@ -1,5 +1,9 @@
-import nextcord
-from nextcord.ext import commands
+try:
+    import nextcord
+    from nextcord.ext import commands
+except ModuleNotFoundError:
+    import disnake as nextcord
+    from disnake.ext import commands
 
 from bot_base.wraps.meta import Meta
 

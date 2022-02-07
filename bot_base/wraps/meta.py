@@ -1,7 +1,10 @@
 import asyncio
 from typing import Optional, TYPE_CHECKING, Any
 
-import nextcord
+try:
+    import nextcord
+except ModuleNotFoundError:
+    import disnake as nextcord
 
 from . import channel
 
@@ -223,20 +226,30 @@ class Meta:
             author_id = self.id
 
         try:
-            if issubclass(type(self), (channel.WrappedChannel, BotContext)):
-                msg = await self._wrapped_bot.wait_for(
-                    "message",
-                    timeout=timeout,
-                    check=lambda message: message.author.id == author_id
+            if issubclass(type(self), channel.WrappedChannel):
+                check = (
+                    lambda message: message.author.id == author_id
                     and message.channel.id == self.id,
                 )
+            elif isinstance(self, BotContext):
+                if not self.guild:
+                    check = (
+                        lambda message: message.author.id == author_id
+                        and not message.guild
+                    )
+                else:
+                    check = (
+                        lambda message: message.author.id == author_id
+                        and message.channel.id == self.channel.id
+                    )
             else:
-                msg = await self._wrapped_bot.wait_for(
-                    "message",
-                    timeout=timeout,
-                    check=lambda message: message.author.id == author_id
-                    and not message.guild,
+                check = (
+                    lambda message: message.author.id == author_id and not message.guild
                 )
+
+            msg = await self._wrapped_bot.wait_for(
+                "message", timeout=timeout, check=check
+            )
 
             if msg:
                 val = msg.content

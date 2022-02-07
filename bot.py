@@ -17,7 +17,6 @@ bot = BotBase(
 @bot.event
 async def on_ready():
     print("I'm up.")
-    await bot.db.run_backup()
 
 
 @bot.command()

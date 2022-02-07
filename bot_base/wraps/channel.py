@@ -1,7 +1,11 @@
 from typing import Union
 
-from nextcord import abc
-from nextcord.ext import commands
+try:
+    from nextcord import abc
+    from nextcord.ext import commands
+except ModuleNotFoundError:
+    from disnake import abc
+    from disnake.ext import commands
 
 from bot_base.wraps.meta import Meta
 

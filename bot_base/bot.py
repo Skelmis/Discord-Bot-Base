@@ -2,15 +2,22 @@ import datetime
 import sys
 import logging
 import traceback
-from typing import Optional, List, Any, Dict, Type, Union, Callable
+from typing import Optional, List, Any, Dict, Union, Callable
 
 import humanize
 
 from bot_base.caches import TimedCache
 
-import nextcord
-from nextcord import DiscordException, abc
-from nextcord.ext import commands
+try:
+    import nextcord
+    from nextcord import DiscordException, abc
+    from nextcord.ext import commands
+    from nextcord.ext.commands.converter import CONVERTER_MAPPING
+except ModuleNotFoundError:
+    import disnake as nextcord
+    from disnake import DiscordException, abc
+    from disnake.ext import commands
+    from disnake.ext.commands.converter import CONVERTER_MAPPING
 
 from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
@@ -25,8 +32,6 @@ from bot_base.wraps import (
 
 log = logging.getLogger(__name__)
 
-
-from nextcord.ext.commands.converter import CONVERTER_MAPPING
 
 CONVERTER_MAPPING[nextcord.User] = WrappedUser
 CONVERTER_MAPPING[nextcord.Member] = WrappedMember

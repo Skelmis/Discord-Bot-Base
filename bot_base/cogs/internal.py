@@ -1,16 +1,14 @@
 import logging
 
-import nextcord
-
 from bot_base import BotBase
 from bot_base.context import BotContext
 
 try:
     import nextcord as discord
-    from nextcord.ext import commands  # noqa
+    from nextcord.ext import commands
 except ModuleNotFoundError:
-    import discord
-    from discord.ext import commands  # noqa
+    import disnake as discord
+    from disnake.ext import commands
 
 log = logging.getLogger(__name__)
 
