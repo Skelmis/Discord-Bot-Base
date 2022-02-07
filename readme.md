@@ -9,7 +9,7 @@ Pycord has no pypi releases so don't ask, this is a 2.x.x template.
 
 [https://pypi.org/project/Bot-Base/](https://pypi.org/project/Bot-Base/)
 
-You can find documentation for this project [here](https://cheatsheet.koldfusion.xyz/modules/discord_bots/bot_base/index.html) 
+You can find documentation for this project [here](https://cheatsheet.koldfusion.xyz?q=bot_base) 
 
 Basic embed:
 
