@@ -6,6 +6,7 @@ from bot_base.caches.abc import Cache
 from bot_base.exceptions import NonExistentEntry, ExistingEntry
 
 
+# This class is unit-tested in my AntiSpam repo
 class TimedCache(Cache):
     __slots__ = ("cache",)
 
@@ -30,7 +31,11 @@ class TimedCache(Cache):
         if key in self and not override:
             raise ExistingEntry
 
-        self.cache[key] = Entry(value=value, expiry_time=(datetime.now() + ttl))
+        self.cache[key] = (
+            Entry(value=value, expiry_time=(datetime.now() + ttl))
+            if ttl
+            else Entry(value=value)
+        )
 
     def delete_entry(self, key: Any) -> None:
         try:
