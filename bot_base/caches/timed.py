@@ -27,7 +27,6 @@ class TimedCache(Cache):
     def add_entry(
         self, key: Any, value: Any, *, ttl: timedelta = None, override: bool = False
     ) -> None:
-        ttl = ttl or timedelta()
         if key in self and not override:
             raise ExistingEntry
 
