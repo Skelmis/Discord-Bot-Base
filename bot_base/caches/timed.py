@@ -49,5 +49,5 @@ class TimedCache(Cache):
     def force_clean(self) -> None:
         now = datetime.now()
         for k, v in deepcopy(self.cache).items():
-            if v.expiry_time < now:
+            if v.expiry_time and v.expiry_time < now:
                 self.delete_entry(k)
