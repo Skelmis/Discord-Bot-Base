@@ -30,11 +30,8 @@ class TimedCache(Cache):
         if key in self and not override:
             raise ExistingEntry
 
-        self.cache[key] = (
-            Entry(value=value, expiry_time=(datetime.now() + ttl))
-            if ttl
-            else Entry(value=value)
-        )
+        ttl = ttl or timedelta.max
+        self.cache[key] = Entry(value=value, expiry_time=(datetime.now() + ttl))
 
     def delete_entry(self, key: Any) -> None:
         try:
