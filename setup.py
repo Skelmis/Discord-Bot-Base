@@ -41,7 +41,7 @@ setup(
         "bot_base.blacklist",
         "bot_base.wraps",
         "bot_base.caches",
-        "bot_base.convertors",
+        "bot_base.converters",
         "bot_base.cogs",
     ],
     install_requires=parse_requirements_file("requirements.txt"),
