@@ -54,6 +54,7 @@ class BotBase(commands.Bot):
                 "Please set `self.db` to a instance/subclass of MongoManager before "
                 "calling (..., leave_db=True) if you wish to have a blacklist."
             )
+            self.blacklist = None
 
         self._uptime: datetime.datetime = datetime.datetime.now(
             tz=datetime.timezone.utc
@@ -89,7 +90,8 @@ class BotBase(commands.Bot):
         )
 
     async def on_ready(self) -> None:
-        await self.blacklist.initialize()
+        if self.blacklist:
+            await self.blacklist.initialize()
 
     async def get_command_prefix(
         self, bot: "BotBase", message: nextcord.Message
@@ -209,18 +211,18 @@ class BotBase(commands.Bot):
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
     async def on_guild_join(self, guild: nextcord.Guild) -> None:
-        if guild.id in self.blacklist.guilds:
+        if self.blacklist and guild.id in self.blacklist.guilds:
             log.info("Leaving blacklisted Guild(id=%s)", guild.id)
             await guild.leave()
 
     async def process_commands(self, message: nextcord.Message) -> None:
         ctx = await self.get_context(message, cls=BotContext)
 
-        if ctx.author.id in self.blacklist.users:
+        if self.blacklist and ctx.author.id in self.blacklist.users:
             log.debug(f"Ignoring blacklisted user: {ctx.author.id}")
             raise BlacklistedEntry(f"Ignoring blacklisted user: {ctx.author.id}")
 
-        if ctx.guild is not None and ctx.guild.id in self.blacklist.guilds:
+        if self.blacklist and ctx.guild is not None and ctx.guild.id in self.blacklist.guilds:
             log.debug(f"Ignoring blacklisted guild: {ctx.guild.id}")
             raise BlacklistedEntry(f"Ignoring blacklisted guild: {ctx.guild.id}")
 
