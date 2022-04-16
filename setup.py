@@ -43,6 +43,7 @@ setup(
         "bot_base.caches",
         "bot_base.converters",
         "bot_base.cogs",
+        "bot_base.paginators",
     ],
     install_requires=parse_requirements_file("requirements.txt"),
     classifiers=[
