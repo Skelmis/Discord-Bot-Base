@@ -1,6 +1,7 @@
 from typing import List, Union, TypeVar, Optional, Callable
 
 import disnake
+from disnake.ext import commands
 
 # Inspired by https://github.com/nextcord/nextcord-ext-menus
 
@@ -144,7 +145,7 @@ class DisnakePaginator:
         """Can we move forward pagination wise."""
         return self.current_page != self.total_pages
 
-    async def start(self, interaction: disnake.Interaction):
+    async def start(self, *, interaction: disnake.Interaction=None, context: commands.Context=None):
         """
         Start paginating this paginator.
 
@@ -153,6 +154,8 @@ class DisnakePaginator:
         interaction: disnake.Interaction
             The Interaction to start
             this pagination on.
+        context: commands.Context
+            The Context to start paginating on.
         """
         first_page: Union[str, disnake.Embed] = await self.format_page(
             self._paged_data[self._current_page_index], self.current_page
@@ -165,16 +168,22 @@ class DisnakePaginator:
         else:
             send_kwargs["content"] = first_page
 
-        if interaction.response._responded:
-            self._message = await interaction.original_message()
-            await self._message.edit(**send_kwargs, view=self._pagination_view)
+        if interaction:
+            if interaction.response._responded:
+                self._message = await interaction.original_message()
+                await self._message.edit(**send_kwargs, view=self._pagination_view)
+            else:
+                await interaction.send(
+                    **send_kwargs,
+                    ephemeral=self._try_ephemeral,
+                    view=self._pagination_view,
+                )
+                self._message = await interaction.original_message()
+        elif context:
+            self._message = await context.channel.send(**send_kwargs,view=self._pagination_view,)
+
         else:
-            await interaction.send(
-                **send_kwargs,
-                ephemeral=self._try_ephemeral,
-                view=self._pagination_view,
-            )
-            self._message = await interaction.original_message()
+            raise RuntimeError("Context or Interaction is required.")
 
         await self._set_buttons()
 
