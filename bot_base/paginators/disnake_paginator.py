@@ -160,7 +160,6 @@ class DisnakePaginator:
         first_page: Union[str, disnake.Embed] = await self.format_page(
             self._paged_data[self._current_page_index], self.current_page
         )
-        self._pagination_view = PaginationView(interaction.user.id, self)
 
         send_kwargs = {}
         if isinstance(first_page, disnake.Embed):
@@ -169,6 +168,7 @@ class DisnakePaginator:
             send_kwargs["content"] = first_page
 
         if interaction:
+            self._pagination_view = PaginationView(interaction.user.id, self)
             if interaction.response._responded:
                 self._message = await interaction.original_message()
                 await self._message.edit(**send_kwargs, view=self._pagination_view)
@@ -180,6 +180,7 @@ class DisnakePaginator:
                 )
                 self._message = await interaction.original_message()
         elif context:
+            self._pagination_view = PaginationView(context.author.id, self)
             self._message = await context.channel.send(**send_kwargs,view=self._pagination_view,)
 
         else:
