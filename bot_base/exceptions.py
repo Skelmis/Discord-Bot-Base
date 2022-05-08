@@ -16,6 +16,10 @@ class NonExistentEntry(DiscordException):
     """No entry found in the cache with this key."""
 
 
+class EventCancelled(DiscordException):
+    """The waiting event was cancelled before a result was formed."""
+
+
 class BlacklistedEntry(DiscordException):
     def __init__(self, message: str):
         self.message: str = message
