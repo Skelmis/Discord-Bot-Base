@@ -4,8 +4,10 @@ import asyncio
 import secrets
 from typing import TYPE_CHECKING, Optional, Any
 
+from bot_base import EventCancelled
+
 if TYPE_CHECKING:
-    from bot_base import BotBase, EventCancelled
+    from bot_base import BotBase
 
 
 class CancellableWaitFor:
