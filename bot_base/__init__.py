@@ -1,8 +1,8 @@
 import logging
 from collections import namedtuple
 
-from .cancellable_wait_for import CancellableWaitFor
 from .exceptions import *
+from .cancellable_wait_for import CancellableWaitFor
 from .bot import BotBase
 from .context import BotContext
 
