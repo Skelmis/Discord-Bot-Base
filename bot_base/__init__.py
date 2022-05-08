@@ -2,9 +2,9 @@ import logging
 from collections import namedtuple
 
 from .cancellable_wait_for import CancellableWaitFor
+from .exceptions import *
 from .bot import BotBase
 from .context import BotContext
-from .exceptions import *
 
 __version__ = "1.4.6"
 
