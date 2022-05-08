@@ -12,7 +12,7 @@ async def time_convertor(argument):
         return 0
 
     matches = matches[0][0].split(" ")
-    matches = [filter(None, re.split(r'(\d+)', s)) for s in matches]
+    matches = [filter(None, re.split(r"(\d+)", s)) for s in matches]
     time = 0
     for match in matches:
         key, value = match

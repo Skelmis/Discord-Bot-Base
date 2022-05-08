@@ -145,7 +145,12 @@ class DisnakePaginator:
         """Can we move forward pagination wise."""
         return self.current_page != self.total_pages
 
-    async def start(self, *, interaction: disnake.Interaction=None, context: commands.Context=None):
+    async def start(
+        self,
+        *,
+        interaction: disnake.Interaction = None,
+        context: commands.Context = None,
+    ):
         """
         Start paginating this paginator.
 
@@ -181,7 +186,10 @@ class DisnakePaginator:
                 self._message = await interaction.original_message()
         elif context:
             self._pagination_view = PaginationView(context.author.id, self)
-            self._message = await context.channel.send(**send_kwargs,view=self._pagination_view,)
+            self._message = await context.channel.send(
+                **send_kwargs,
+                view=self._pagination_view,
+            )
 
         else:
             raise RuntimeError("Context or Interaction is required.")

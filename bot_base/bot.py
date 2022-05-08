@@ -6,6 +6,7 @@ from typing import Optional, List, Any, Dict, Union, Callable
 
 import humanize
 
+from bot_base import CancellableWaitFor
 from bot_base.caches import TimedCache
 
 try:
@@ -222,7 +223,11 @@ class BotBase(commands.Bot):
             log.debug(f"Ignoring blacklisted user: {ctx.author.id}")
             raise BlacklistedEntry(f"Ignoring blacklisted user: {ctx.author.id}")
 
-        if self.blacklist and ctx.guild is not None and ctx.guild.id in self.blacklist.guilds:
+        if (
+            self.blacklist
+            and ctx.guild is not None
+            and ctx.guild.id in self.blacklist.guilds
+        ):
             log.debug(f"Ignoring blacklisted guild: {ctx.guild.id}")
             raise BlacklistedEntry(f"Ignoring blacklisted guild: {ctx.guild.id}")
 
@@ -324,3 +329,8 @@ class BotBase(commands.Bot):
 
         else:
             super().dispatch(event_name, *args, **kwargs)  # type: ignore
+
+    def cancellable_wait_for(
+        self, event: str, *, check=None, timeout: int = None
+    ) -> CancellableWaitFor:
+        return CancellableWaitFor(self, event=event, check=check, timeout=timeout)
