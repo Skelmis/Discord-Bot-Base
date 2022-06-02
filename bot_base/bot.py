@@ -203,21 +203,19 @@ class BotBase(commands.Bot):
         if ctx.command.qualified_name == "logout":
             return
 
-        if (
-            self.do_command_stats
-            and await self.db.command_usage.find(ctx.command.qualified_name) is None
-        ):
-            await self.db.command_usage.upsert(
-                {
-                    "_id": ctx.command.qualified_name,
-                    "usage_count": 1,
-                    "failure_count": 0,
-                }
-            )
-        else:
-            await self.db.command_usage.increment(
-                ctx.command.qualified_name, 1, "usage_count"
-            )
+        if self.do_command_stats:
+            if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+                await self.db.command_usage.upsert(
+                    {
+                        "_id": ctx.command.qualified_name,
+                        "usage_count": 1,
+                        "failure_count": 0,
+                    }
+                )
+            else:
+                await self.db.command_usage.increment(
+                    ctx.command.qualified_name, 1, "usage_count"
+                )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
     async def on_guild_join(self, guild: nextcord.Guild) -> None:
