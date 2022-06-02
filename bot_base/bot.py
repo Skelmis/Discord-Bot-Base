@@ -150,7 +150,7 @@ class BotBase(commands.Bot):
         if guild_id in self.prefix_cache:
             return self.prefix_cache.get_entry(guild_id)
 
-        prefix_data = await self.db.config.find(guild_id)
+        prefix_data = await self.db.config.find({"_id": guild_id})
 
         if not prefix_data:
             raise PrefixNotFound

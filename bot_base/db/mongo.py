@@ -2,9 +2,9 @@ import datetime
 import logging
 from typing import List, Dict
 
+from alaric import Document
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from bot_base.db.document import Document
 
 log = logging.getLogger(__name__)
 

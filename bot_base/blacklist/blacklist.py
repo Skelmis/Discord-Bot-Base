@@ -61,8 +61,8 @@ class BlacklistManager:
 
         if is_guild_blacklist:
             self.guilds.discard(item)
-            await self.db.guild_blacklist.delete(item)
+            await self.db.guild_blacklist.delete({"_id": item})
 
         else:
             self.users.discard(item)
-            await self.db.user_blacklist.delete(item)
+            await self.db.user_blacklist.delete({"_id": item})
