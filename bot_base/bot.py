@@ -40,13 +40,19 @@ CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannel
 
 
 class BotBase(commands.Bot):
-    def __init__(self, *args, **kwargs) -> None:
-        leave_db = kwargs.pop("leave_db", False)
+    def __init__(
+        self,
+        *args,
+        leave_db: bool = False,
+        do_command_stats: bool = True,
+        **kwargs,
+    ) -> None:
         if not leave_db:
             self.db: MongoManager = MongoManager(
                 kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
             )
 
+        self.do_command_stats: bool = do_command_stats
         try:
             self.blacklist: BlacklistManager = BlacklistManager(self.db)
         except AttributeError:
@@ -176,7 +182,7 @@ class BotBase(commands.Bot):
         elif isinstance(error, BlacklistedEntry):
             await ctx.send(error.message)
 
-        if not isinstance(error, commands.CommandNotFound):
+        if not isinstance(error, commands.CommandNotFound) and self.do_command_stats:
             if await self.db.command_usage.find(ctx.command.qualified_name) is None:
                 await self.db.command_usage.upsert(
                     {
@@ -197,7 +203,10 @@ class BotBase(commands.Bot):
         if ctx.command.qualified_name == "logout":
             return
 
-        if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+        if (
+            self.do_command_stats
+            and await self.db.command_usage.find(ctx.command.qualified_name) is None
+        ):
             await self.db.command_usage.upsert(
                 {
                     "_id": ctx.command.qualified_name,
