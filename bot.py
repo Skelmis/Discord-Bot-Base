@@ -34,4 +34,5 @@ async def echo(ctx):
 async def ping(ctx):
     await ctx.send_basic_embed("Pong!")
 
+
 bot.run(os.environ["TOKEN"])

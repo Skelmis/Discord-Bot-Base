@@ -5,6 +5,7 @@ from typing import List, Dict
 from alaric import Document
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from bot_base.db import Invite
 
 log = logging.getLogger(__name__)
 
@@ -17,11 +18,11 @@ class MongoManager:
         self.db = self.__mongo[self.database_name]
 
         # Documents
-        self.user_blacklist = Document(self.db, "user_blacklist")
-        self.guild_blacklist = Document(self.db, "guild_blacklist")
-
-    def typed_lookup(self, attr: str) -> Document:
-        return getattr(self, attr)
+        self.user_blacklist: Document = Document(self.db, "user_blacklist")
+        self.guild_blacklist: Document = Document(self.db, "guild_blacklist")
+        self.invite_tracking: Document = Document(
+            self.db, "invite_tracking", converter=Invite
+        )
 
     def __getattr__(self, item) -> Document:
         """

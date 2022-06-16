@@ -18,6 +18,7 @@ class Cog(commands.Cog):
     Attempts to call an async method async_init
     on load, implement the method as required.
     """
+
     def __init__(self, bot: BotBase):
         self.bot: BotBase = bot
 
@@ -29,6 +30,6 @@ class Cog(commands.Cog):
                 raise RuntimeError("Cog's must be loaded in an async context.") from e
 
     if TYPE_CHECKING:
+
         async def async_init(self) -> None:
             ...
-
