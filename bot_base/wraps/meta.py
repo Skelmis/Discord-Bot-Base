@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from typing import Optional, TYPE_CHECKING, Any
 
@@ -18,9 +20,9 @@ class Meta:
     class's and reduce code duplication
     """
 
-    def __init__(self, wrapped_item, bot: "BotBase"):
+    def __init__(self, wrapped_item, bot: BotBase):
         self._wrapped_item = wrapped_item
-        self._wrapped_bot = bot
+        self._wrapped_bot: BotBase = bot
 
         if isinstance(wrapped_item, type(self)):
             self._wrapped_item = wrapped_item._wrapped_item

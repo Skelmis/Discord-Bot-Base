@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 try:
     import nextcord
     from nextcord.ext import commands
@@ -20,3 +24,14 @@ class WrappedMember(Meta, nextcord.Member):
 
     def __getattr__(self, item):
         return getattr(self._wrapped_item, item)
+
+    async def invited_by(self) -> Optional[WrappedMember]:
+        """Get the member who invited this user to the guild."""
+        inviter: Optional[WrappedMember] = None
+        for invite in self._wrapped_bot.invite_cache.values():
+            if invite.used_by(self.id):
+                inviter = await self._wrapped_bot.get_or_fetch_member(
+                    self.guild.id, self.id
+                )
+
+        return inviter

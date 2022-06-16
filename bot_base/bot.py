@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 
 from bot_base.blacklist import BlacklistManager
 from bot_base.context import BotContext
-from bot_base.db import MongoManager
+from bot_base.db import MongoManager, Invite
 from bot_base.exceptions import PrefixNotFound, BlacklistedEntry
 from bot_base.wraps import (
     WrappedChannel,
@@ -69,6 +69,7 @@ class BotBase(commands.Bot):
             tz=datetime.timezone.utc
         )
         self.prefix_cache: TimedCache = TimedCache()
+        self.invite_cache: Dict[str, Invite] = {}  # type: ignore # Not sure why this is weird
 
         self.DEFAULT_PREFIX: str = command_prefix
         kwargs["command_prefix"] = self.get_command_prefix
