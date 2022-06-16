@@ -43,14 +43,16 @@ class BotBase(commands.Bot):
     def __init__(
         self,
         *args,
+        mongo_url: str,
+        command_prefix: str,
         leave_db: bool = False,
         do_command_stats: bool = True,
+        load_builtin_commands: bool = False,
+        mongo_database_name: Optional[str] = None,
         **kwargs,
     ) -> None:
         if not leave_db:
-            self.db: MongoManager = MongoManager(
-                kwargs.pop("mongo_url"), kwargs.pop("mongo_database_name", None)
-            )
+            self.db: MongoManager = MongoManager(mongo_url, mongo_database_name)
 
         self.do_command_stats: bool = do_command_stats
         try:
@@ -68,12 +70,12 @@ class BotBase(commands.Bot):
         )
         self.prefix_cache: TimedCache = TimedCache()
 
-        self.DEFAULT_PREFIX: str = kwargs.pop("command_prefix")  # type: ignore
+        self.DEFAULT_PREFIX: str = command_prefix
         kwargs["command_prefix"] = self.get_command_prefix
 
         super().__init__(*args, **kwargs)
 
-        if kwargs.pop("load_builtin_commands", None):
+        if load_builtin_commands:
             self.load_extension("bot_base.cogs.internal")
 
         # These events do include the on_ prefix
