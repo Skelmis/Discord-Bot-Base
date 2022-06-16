@@ -1,7 +1,6 @@
 import logging
 import os
 
-
 from bot_base import BotBase
 
 logging.basicConfig(level=logging.INFO)
@@ -34,6 +33,5 @@ async def echo(ctx):
 @bot.command()
 async def ping(ctx):
     await ctx.send_basic_embed("Pong!")
-
 
 bot.run(os.environ["TOKEN"])
