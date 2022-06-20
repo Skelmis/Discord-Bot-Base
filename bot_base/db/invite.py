@@ -12,6 +12,7 @@ class Invite:
         invite_id: str,
         *,
         uses: int,
+        max_uses: int,
         guild_id: int,
         created_by: int,
         invited_members: List[int] = None,
@@ -19,9 +20,10 @@ class Invite:
         **kwargs,
     ):
         self.uses: int = uses
+        self.max_uses: int = max_uses
         self.guild_id: int = guild_id
         self.invite_id: str = invite_id
-        self.created_at: int = created_by
+        self.created_by: int = created_by
         self.invited_members: Set[int] = (
             set(invited_members) if invited_members else set()
         )
@@ -38,10 +40,11 @@ class Invite:
 
     def as_dict(self) -> Dict:
         return {
+            "max_uses": self.max_uses,
             "invite_id": self.invite_id,
             "guild_id": self.guild_id,
             "uses": self.uses,
-            "created_by": self.created_at,
+            "created_by": self.created_by,
             "invited_members": list(self.invited_members),
             "previously_invited_members": self.previously_invited_members,
         }

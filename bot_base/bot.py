@@ -5,6 +5,7 @@ import traceback
 from typing import Optional, List, Any, Dict, Union, Callable
 
 import humanize
+from alaric.comparison import EQ
 
 from bot_base import CancellableWaitFor
 from bot_base.caches import TimedCache
@@ -43,6 +44,7 @@ class BotBase(commands.Bot):
     def __init__(
         self,
         *args,
+        intents: nextcord.Intents,
         mongo_url: str,
         command_prefix: str,
         leave_db: bool = False,
@@ -74,7 +76,7 @@ class BotBase(commands.Bot):
         self.DEFAULT_PREFIX: str = command_prefix
         kwargs["command_prefix"] = self.get_command_prefix
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, intents=intents, **kwargs)
 
         if load_builtin_commands:
             self.load_extension("bot_base.cogs.internal")
@@ -82,6 +84,7 @@ class BotBase(commands.Bot):
         # These events do include the on_ prefix
         self._single_event_type_sheet: Dict[str, Callable] = {
             "on_message": self.get_wrapped_message,
+            "on_member_remove": self.get_wrapped_person,
         }
         self._double_event_type_sheet: Dict[str, Callable] = {
             "on_message_edit": lambda before, after: (
@@ -207,17 +210,23 @@ class BotBase(commands.Bot):
             return
 
         if self.do_command_stats:
-            if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+            if (
+                await self.db.command_usage.find(
+                    EQ("_id", ctx.command.qualified_name),
+                )
+                is None
+            ):
                 await self.db.command_usage.upsert(
+                    {"_id": ctx.command.qualified_name},
                     {
                         "_id": ctx.command.qualified_name,
                         "usage_count": 1,
                         "failure_count": 0,
-                    }
+                    },
                 )
             else:
                 await self.db.command_usage.increment(
-                    ctx.command.qualified_name, 1, "usage_count"
+                    {"_id": ctx.command.qualified_name}, "usage_count", 1
                 )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 

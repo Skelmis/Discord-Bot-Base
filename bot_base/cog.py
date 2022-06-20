@@ -25,7 +25,7 @@ class Cog(commands.Cog):
         internal_hook = getattr(self, "async_init", None)
         if internal_hook:
             try:
-                asyncio.create_task(internal_hook)
+                asyncio.create_task(internal_hook())
             except RuntimeError as e:
                 raise RuntimeError("Cog's must be loaded in an async context.") from e
 

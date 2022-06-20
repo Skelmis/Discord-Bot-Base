@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 try:
     import nextcord
@@ -11,9 +11,16 @@ except ModuleNotFoundError:
 
 from bot_base.wraps.meta import Meta
 
+if TYPE_CHECKING:
+    from bot_base import BotBase
+
 
 class WrappedMember(Meta, nextcord.Member):
     """Wraps discord.Member for ease of stuff"""
+
+    def __init__(self, wrapped_item, bot: BotBase):
+        super().__init__(wrapped_item, bot)
+        self._inviter: Optional[WrappedMember] = None
 
     @classmethod
     async def convert(cls, ctx, argument: str) -> "WrappedMember":
@@ -27,11 +34,13 @@ class WrappedMember(Meta, nextcord.Member):
 
     async def invited_by(self) -> Optional[WrappedMember]:
         """Get the member who invited this user to the guild."""
-        inviter: Optional[WrappedMember] = None
+        if self._inviter:
+            return self._inviter
+
         for invite in self._wrapped_bot.invite_cache.values():
             if invite.used_by(self.id):
-                inviter = await self._wrapped_bot.get_or_fetch_member(
-                    self.guild.id, self.id
+                self._inviter = await self._wrapped_bot.get_or_fetch_member(
+                    self.guild.id, invite.created_by
                 )
 
-        return inviter
+        return self._inviter
