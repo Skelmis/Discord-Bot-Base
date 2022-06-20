@@ -3,7 +3,7 @@ from bot_base.db import MongoManager
 
 class BlacklistManager:
     def __init__(self, db: MongoManager):
-        self.db = db
+        self.db: MongoManager = db
 
         self.users = set()
         self.guilds = set()

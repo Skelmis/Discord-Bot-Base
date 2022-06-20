@@ -22,6 +22,7 @@ async def main():
         mongo_url=os.environ["MONGO_URL"],
         mongo_database_name="my_bot",
         load_builtin_commands=True,
+        load_invite_tracking=True,
         intents=disnake.Intents.all(),
     )
 
@@ -43,61 +44,6 @@ async def main():
     @bot.command()
     async def ping(ctx):
         await ctx.send_basic_embed("Pong!")
-
-    def clean_code(content):
-        """Automatically removes code blocks from the code."""
-        # remove ```py\n```
-        if content.startswith("```") and content.endswith("```"):
-            return "\n".join(content.split("\n")[1:])[:-3]
-        else:
-            return content
-
-    @bot.command(name="eval", aliases=["exec"])
-    # @commands.is_owner()
-    async def _eval(ctx, *, code):
-        """
-        Evaluates given code.
-        """
-        code = clean_code(code)
-
-        local_variables = {
-            "commands": commands,
-            "bot": bot,
-            "ctx": ctx,
-            "channel": ctx.channel,
-            "author": ctx.author,
-            "guild": ctx.guild,
-            "message": ctx.message,
-        }
-
-        stdout = io.StringIO()
-
-        try:
-            with contextlib.redirect_stdout(stdout):
-                exec(
-                    f"async def func():\n{textwrap.indent(code, '    ')}",
-                    local_variables,
-                )
-
-                obj = await local_variables["func"]()
-                result = f"{stdout.getvalue()}\n-- {obj}\n"
-
-        except Exception as e:
-            result = "".join(format_exception(e, e, e.__traceback__))
-
-        async def format_page(code, page_number):
-            embed = disnake.Embed(title=f"Eval for {ctx.author.name}")
-            embed.description = f"```{code}```"
-
-            embed.set_footer(text=f"Page {page_number}")
-            return embed
-
-        paginator: DisnakePaginator = DisnakePaginator(
-            1,
-            [result[i : i + 2000] for i in range(0, len(result), 2000)],
-        )
-        paginator.format_page = format_page
-        await paginator.start(context=ctx)
 
     bot.load_extension("bot_base.cogs.invite_tracking")
     await bot.start(os.environ["TOKEN"])

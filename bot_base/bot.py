@@ -49,6 +49,7 @@ class BotBase(commands.Bot):
         command_prefix: str,
         leave_db: bool = False,
         do_command_stats: bool = True,
+        load_invite_tracking: bool = False,
         load_builtin_commands: bool = False,
         mongo_database_name: Optional[str] = None,
         **kwargs,
@@ -61,9 +62,9 @@ class BotBase(commands.Bot):
             self.blacklist: BlacklistManager = BlacklistManager(self.db)
         except AttributeError:
             log.warning(
-                "You do not have a blacklist setup. "
+                "You do not have a database setup. "
                 "Please set `self.db` to a instance/subclass of MongoManager before "
-                "calling (..., leave_db=True) if you wish to have a blacklist."
+                "calling (..., leave_db=True) if you wish to have any builtin commands."
             )
             self.blacklist = None
 
@@ -80,6 +81,9 @@ class BotBase(commands.Bot):
 
         if load_builtin_commands:
             self.load_extension("bot_base.cogs.internal")
+
+        if load_invite_tracking:
+            self.load_extension("bot_base.cogs.invite_tracking")
 
         # These events do include the on_ prefix
         self._single_event_type_sheet: Dict[str, Callable] = {
