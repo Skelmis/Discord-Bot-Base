@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
+
+from bot_base.vanity import Vanity
 
 try:
     import nextcord
@@ -32,15 +34,19 @@ class WrappedMember(Meta, nextcord.Member):
     def __getattr__(self, item):
         return getattr(self._wrapped_item, item)
 
-    async def invited_by(self) -> Optional[WrappedMember]:
+    async def invited_by(self) -> Optional[Union[WrappedMember, Vanity]]:
         """Get the member who invited this user to the guild."""
         if self._inviter:
             return self._inviter
 
         for invite in self._wrapped_bot.invite_cache.values():
             if invite.used_by(self.id):
+                if isinstance(invite.created_by, Vanity):
+                    self._inviter = invite.created_by
+                    return self._inviter
+
                 self._inviter = await self._wrapped_bot.get_or_fetch_member(
-                    self.guild.id, invite.created_by
+                    invite.created_by, self.guild.id
                 )
 
         return self._inviter

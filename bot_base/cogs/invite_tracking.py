@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-import asyncio
 import logging
-from typing import Dict, cast, List, Set, TYPE_CHECKING
+from typing import Dict, cast, List, Set, TYPE_CHECKING, Optional
 
-from alaric import Document, AQ
+from alaric import Document
 from alaric.comparison import EQ
-from alaric.logical import AND
 from alaric.projections import PROJECTION, SHOW
 
+from bot_base.vanity import Vanity
 
 try:
     import nextcord as discord
@@ -55,8 +54,8 @@ class InviteTracking(Cog):
         current_guilds: Set[int] = set()
         for guild in self.bot.guilds:
             current_guilds.add(guild.id)
-            if guild.id not in persisted_guilds:
-                await self.load_guild(guild)
+            # Update all invites we missed while down
+            await self.load_guild(guild)
 
         # Delete guilds we have 'left'
         for guild_id in persisted_guilds:
@@ -78,6 +77,7 @@ class InviteTracking(Cog):
         await self.invite_document.delete(EQ("guild_id", guild_id))
         log.debug("Deleted all invites for guild %s", guild_id)
 
+    # noinspection DuplicatedCode
     async def load_guild(self, guild: discord.Guild) -> None:
         """Load a guilds invites into the system."""
         try:
@@ -106,6 +106,27 @@ class InviteTracking(Cog):
                 current_invite.uses = invite.uses
 
             await self.save_invite(current_invite)
+
+        try:
+            vanity_invite: Optional[discord.Invite] = await guild.vanity_invite()
+        except discord.Forbidden:
+            # Tis okay, we don't *need* it
+            pass
+        else:
+            if vanity_invite:
+                try:
+                    current_invite: Invite = self.invite_cache[vanity_invite.id]
+                except KeyError:
+                    current_invite: Invite = Invite(
+                        vanity_invite.id,
+                        created_by=Vanity(guild_id=guild.id, guild_name=guild.name),
+                        uses=vanity_invite.uses,
+                        max_uses=vanity_invite.max_uses,
+                        guild_id=guild.id,
+                    )
+                else:
+                    current_invite.uses = vanity_invite.uses
+                await self.save_invite(current_invite)
 
         log.debug(
             "Loaded current invites for Guild(id=%s, name=%s)",
@@ -145,7 +166,20 @@ class InviteTracking(Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         possible_invites: List[Invite] = []
-        all_invites: List[discord.Invite] = await member.guild.invites()
+        try:
+            all_invites: List[discord.Invite] = await member.guild.invites()
+        except discord.Forbidden:
+            log.warning(
+                "I cannot track Member(id=%s, name=%s) "
+                "in Guild(id=%s, name=%s) "
+                "as I am missing permissions.",
+                member.id,
+                member.display_name,
+                member.guild.id,
+                member.guild.name,
+            )
+            return
+
         for current_invite in all_invites:
             for cached_invite in self.invite_cache.values():
                 if (

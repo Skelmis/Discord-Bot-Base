@@ -6,6 +6,7 @@ from .cancellable_wait_for import CancellableWaitFor
 from .bot import BotBase
 from .context import BotContext
 from .cog import Cog
+from .vanity import Vanity
 
 __version__ = "1.5.0"
 

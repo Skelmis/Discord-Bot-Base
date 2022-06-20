@@ -272,15 +272,30 @@ class BotBase(commands.Bot):
 
         await self.process_commands(message)
 
-    async def get_or_fetch_member(self, guild_id: int, member_id: int) -> WrappedMember:
+    async def get_or_fetch_member(self, member_id: int, guild_id: int) -> WrappedMember:
         """Looks up a member in cache or fetches if not found."""
-        guild = await self.get_or_fetch_guild(guild_id)
-        member = guild.get_member(member_id)
-        if member is not None:
-            return WrappedMember(member, bot=self)
+        try:
+            guild = await self.get_or_fetch_guild(guild_id)
+            member = guild.get_member(member_id)
+            if member is not None:
+                return WrappedMember(member, bot=self)
 
-        member = await guild.fetch_member(member_id)
-        return WrappedMember(member, bot=self)
+            member = await guild.fetch_member(member_id)
+            return WrappedMember(member, bot=self)
+        except:
+            # Support backwards compat
+            log.warning(
+                "The arguments in get_or_fetch_member are switched. "
+                "Backwards compatibility will be removed in a future version."
+            )
+            guild_id, member_id = member_id, guild_id
+            guild = await self.get_or_fetch_guild(guild_id)
+            member = guild.get_member(member_id)
+            if member is not None:
+                return WrappedMember(member, bot=self)
+
+            member = await guild.fetch_member(member_id)
+            return WrappedMember(member, bot=self)
 
     async def get_or_fetch_channel(self, channel_id: int) -> WrappedChannel:
         """Looks up a channel in cache or fetches if not found."""
