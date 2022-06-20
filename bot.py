@@ -2,7 +2,7 @@ import os
 import asyncio
 import logging
 
-import disnake as disnake
+import disnake
 
 from bot_base import BotBase
 
