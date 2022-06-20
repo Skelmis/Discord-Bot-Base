@@ -23,7 +23,7 @@ class WrappedMember(Meta, nextcord.Member):
         self._inviter: Optional[WrappedMember] = None
 
     @classmethod
-    async def convert(cls, ctx, argument: str) -> "WrappedMember":
+    async def convert(cls, ctx, argument: str) -> WrappedMember:
         member: nextcord.Member = await commands.MemberConverter().convert(
             ctx=ctx, argument=argument
         )

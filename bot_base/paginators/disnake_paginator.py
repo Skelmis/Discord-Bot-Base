@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List, Union, TypeVar, Optional, Callable
 
 import disnake
@@ -18,13 +20,13 @@ class PaginationView(disnake.ui.View):
     def __init__(
         self,
         author_id: int,
-        paginator: "DisnakePaginator",
+        paginator: DisnakePaginator,
         *,
         timeout: Optional[float] = 180,
     ):
         super().__init__(timeout=timeout)
         self.author_id: int = author_id
-        self._paginator: "DisnakePaginator" = paginator
+        self._paginator: DisnakePaginator = paginator
 
         # Default to disabled, we change them later anyway if actually required.
         self.first_page_button = disnake.ui.Button(label=self.FIRST_PAGE, disabled=True)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import sys
 import logging
@@ -35,9 +37,9 @@ from bot_base.wraps import (
 log = logging.getLogger(__name__)
 
 
-CONVERTER_MAPPING[nextcord.User] = WrappedUser
-CONVERTER_MAPPING[nextcord.Member] = WrappedMember
-CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannel
+CONVERTER_MAPPING[nextcord.User] = WrappedUser  # type: ignore
+CONVERTER_MAPPING[nextcord.Member] = WrappedMember  # type: ignore
+CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannel  # type: ignore
 
 
 class BotBase(commands.Bot):
@@ -130,7 +132,7 @@ class BotBase(commands.Bot):
     def get_case_insensitive_prefix(content, prefix):
         if content.casefold().startswith(prefix.casefold()):
             # The prefix matches, now return the one the user used
-            # such that dpy will dispatch the given command
+            # such that the bot will dispatch the given command
             prefix_length = len(prefix)
             prefix = content[:prefix_length]
 
@@ -298,7 +300,7 @@ class BotBase(commands.Bot):
         guild = await self.fetch_guild(guild_id)
         return guild
 
-    async def get_or_fetch_user(self, user_id: int) -> WrappedUser:
+    async def get_or_fetch_user(self, user_id: int) -> WrappedUser:  # noqa
         """Looks up a user in cache or fetches if not found."""
         user = self.get_user(user_id)
         if user:

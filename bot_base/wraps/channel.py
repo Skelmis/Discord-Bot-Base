@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 try:
@@ -14,7 +16,7 @@ class WrappedChannel(Meta, abc.GuildChannel, abc.PrivateChannel):  # noqa
     """Wraps nextcord.TextChannel for ease of stuff"""
 
     @classmethod
-    async def convert(cls, ctx, argument: str) -> "WrappedChannel":
+    async def convert(cls, ctx, argument: str) -> WrappedChannel:
         channel: Union[
             abc.GuildChannel, abc.PrivateChannel
         ] = await commands.TextChannelConverter().convert(ctx=ctx, argument=argument)

@@ -1,19 +1,13 @@
-import asyncio
-import contextlib
-import io
-import logging
 import os
-import textwrap
-from traceback import format_exception
+import asyncio
+import logging
 
 import disnake as disnake
-from disnake.ext import commands
 
 from bot_base import BotBase
-from bot_base.paginators.disnake_paginator import DisnakePaginator
 
+log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
-logging.getLogger("bot_base.cogs.invite_tracking").setLevel(logging.DEBUG)
 
 
 async def main():
@@ -28,7 +22,7 @@ async def main():
 
     @bot.event
     async def on_ready():
-        print("I'm up.")
+        log.info("I'm up")
 
     @bot.command()
     async def echo(ctx):
@@ -45,7 +39,6 @@ async def main():
     async def ping(ctx):
         await ctx.send_basic_embed("Pong!")
 
-    bot.load_extension("bot_base.cogs.invite_tracking")
     await bot.start(os.environ["TOKEN"])
 
 

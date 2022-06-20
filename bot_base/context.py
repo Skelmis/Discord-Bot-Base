@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 try:
@@ -14,7 +16,6 @@ if TYPE_CHECKING:
 class BotContext(commands.Context, Meta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        bot: "BotBase" = self.bot
-        self._wrapped_bot = bot
+        self._wrapped_bot: BotBase = self.bot
 
-        self.message = bot.get_wrapped_message(self.message)
+        self.message = self.bot.get_wrapped_message(self.message)

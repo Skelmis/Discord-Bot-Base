@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 try:
     import nextcord
     from nextcord.ext import commands
@@ -12,7 +14,7 @@ class WrappedUser(Meta, nextcord.User):
     """Wraps discord.user for ease of stuff"""
 
     @classmethod
-    async def convert(cls, ctx, argument: str) -> "WrappedUser":
+    async def convert(cls, ctx, argument: str) -> WrappedUser:
         user: nextcord.User = await commands.UserConverter().convert(
             ctx=ctx, argument=argument
         )
