@@ -1,5 +1,5 @@
-dnspython
-motor
-humanize
-attrs
-alaric
+dnspython==2.2.1
+motor==3.0.0
+humanize==4.2.0
+attrs>=21.4.0
+alaric>=1.0.1

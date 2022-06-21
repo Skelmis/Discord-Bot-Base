@@ -5,6 +5,8 @@ import traceback
 from typing import Optional, List, Any, Dict, Union, Callable
 
 import humanize
+from alaric import AQ
+from alaric.comparison import EQ
 
 from bot_base import CancellableWaitFor
 from bot_base.caches import TimedCache
@@ -189,17 +191,23 @@ class BotBase(commands.Bot):
             await ctx.send(error.message)
 
         if not isinstance(error, commands.CommandNotFound) and self.do_command_stats:
-            if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+            if (
+                await self.db.command_usage.find(
+                    AQ(EQ("_id", ctx.command.qualified_name))
+                )
+                is None
+            ):
                 await self.db.command_usage.upsert(
+                    AQ(EQ("_id", ctx.command.qualified_name)),
                     {
                         "_id": ctx.command.qualified_name,
                         "usage_count": 0,
                         "failure_count": 1,
-                    }
+                    },
                 )
             else:
                 await self.db.command_usage.increment(
-                    ctx.command.qualified_name, 1, "failure_count"
+                    AQ(EQ("_id", ctx.command.qualified_name)), 1, "failure_count"
                 )
 
             log.debug(f"Command failed: `{ctx.command.qualified_name}`")
@@ -210,17 +218,23 @@ class BotBase(commands.Bot):
             return
 
         if self.do_command_stats:
-            if await self.db.command_usage.find(ctx.command.qualified_name) is None:
+            if (
+                await self.db.command_usage.find(
+                    AQ(EQ("_id", ctx.command.qualified_name))
+                )
+                is None
+            ):
                 await self.db.command_usage.upsert(
+                    AQ(EQ("_id", ctx.command.qualified_name)),
                     {
                         "_id": ctx.command.qualified_name,
                         "usage_count": 1,
                         "failure_count": 0,
-                    }
+                    },
                 )
             else:
                 await self.db.command_usage.increment(
-                    ctx.command.qualified_name, 1, "usage_count"
+                    AQ(EQ("_id", ctx.command.qualified_name)), 1, "usage_count"
                 )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
