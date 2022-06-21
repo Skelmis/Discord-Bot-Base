@@ -93,10 +93,14 @@ class BotBase(commands.Bot):
     def uptime(self) -> datetime.datetime:
         return self._uptime
 
-    def get_bot_uptime(self) -> str:
+    def get_uptime(self) -> str:
         return humanize.precisedelta(
             self.uptime - datetime.datetime.now(tz=datetime.timezone.utc)
         )
+
+    def get_bot_uptime(self) -> str:
+        log.warning("This method is deprecated, use get_uptime instead")
+        return self.get_uptime()
 
     async def on_ready(self) -> None:
         if self.blacklist:
