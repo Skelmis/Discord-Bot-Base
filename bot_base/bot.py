@@ -45,10 +45,10 @@ class BotBase(commands.Bot):
     def __init__(
         self,
         *args,
-        mongo_url: str,
         command_prefix: str,
         leave_db: bool = False,
         do_command_stats: bool = True,
+        mongo_url: Optional[str] = None,
         load_builtin_commands: bool = False,
         mongo_database_name: Optional[str] = None,
         **kwargs,
