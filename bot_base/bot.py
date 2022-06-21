@@ -207,7 +207,7 @@ class BotBase(commands.Bot):
                 )
             else:
                 await self.db.command_usage.increment(
-                    AQ(EQ("_id", ctx.command.qualified_name)), 1, "failure_count"
+                    AQ(EQ("_id", ctx.command.qualified_name)), "failure_count", 1
                 )
 
             log.debug(f"Command failed: `{ctx.command.qualified_name}`")
@@ -234,7 +234,7 @@ class BotBase(commands.Bot):
                 )
             else:
                 await self.db.command_usage.increment(
-                    AQ(EQ("_id", ctx.command.qualified_name)), 1, "usage_count"
+                    AQ(EQ("_id", ctx.command.qualified_name)), "usage_count", 1
                 )
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
