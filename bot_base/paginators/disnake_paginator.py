@@ -173,20 +173,38 @@ class DisnakePaginator:
             self._pagination_view = PaginationView(interaction.user.id, self)
             if interaction.response._responded:
                 self._message = await interaction.original_message()
-                await self._message.edit(**send_kwargs, view=self._pagination_view)
+                if self.requires_pagination:
+                    await self._message.edit(**send_kwargs, view=self._pagination_view)
+
+                else:
+                    await self._message.edit(**send_kwargs)
+
             else:
-                await interaction.send(
-                    **send_kwargs,
-                    ephemeral=self._try_ephemeral,
-                    view=self._pagination_view,
-                )
+                if self.requires_pagination:
+                    await interaction.send(
+                        **send_kwargs,
+                        ephemeral=self._try_ephemeral,
+                        view=self._pagination_view,
+                    )
+
+                else:
+                    await interaction.send(
+                        **send_kwargs,
+                        ephemeral=self._try_ephemeral,
+                    )
+
                 self._message = await interaction.original_message()
+
         elif context:
             self._pagination_view = PaginationView(context.author.id, self)
-            self._message = await context.channel.send(
-                **send_kwargs,
-                view=self._pagination_view,
-            )
+            if self.requires_pagination:
+                self._message = await context.channel.send(
+                    **send_kwargs,
+                    view=self._pagination_view,
+                )
+
+            else:
+                self._message = await context.channel.send(**send_kwargs)
 
         else:
             raise RuntimeError("Context or Interaction is required.")
