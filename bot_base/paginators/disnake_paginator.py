@@ -92,15 +92,12 @@ class DisnakePaginator:
         self._delete_buttons_on_stop: bool = delete_buttons_on_stop
         self._inline_format_page: Optional[Callable] = page_formatter
 
-        if items_per_page > len(input_data):
-            raise ValueError(
-                "Cannot have more items per page then total provided items."
-            )
-        elif items_per_page <= 0:
+        if items_per_page <= 0:
             raise ValueError("items_per_page must be 1 or higher.")
 
         if self._items_per_page == 1:
             self._paged_data: List[T] = self.__input_data
+
         else:
             self._paged_data: List[List[T]] = [
                 self.__input_data[i : i + self._items_per_page]
