@@ -1,8 +1,10 @@
+import asyncio
 import datetime
+import functools
 import sys
 import logging
 import traceback
-from typing import Optional, List, Any, Dict, Union, Callable
+from typing import Optional, List, Any, Dict, Union, Callable, Coroutine
 
 import humanize
 from alaric import AQ
@@ -361,3 +363,57 @@ class BotBase(commands.Bot):
         self, event: str, *, check=None, timeout: int = None
     ) -> CancellableWaitFor:
         return CancellableWaitFor(self, event=event, check=check, timeout=timeout)
+
+    async def sleep_with_condition(
+        self,
+        seconds: float,
+        condition: Union[
+            bool,
+            functools.partial,
+            Callable[[Any], bool],
+            Callable[[Any], Coroutine[Any, Any, bool]],
+        ],
+        *,
+        interval: float = 5,
+    ) -> None:
+        """Sleep until either condition is True or we run out of seconds
+
+        Parameters
+        ----------
+        seconds: float
+            How long to sleep for up to
+        condition
+            Pass either:
+            - A reference to a variable you can change later
+            - A sync function to call which returns a bool
+            - An async function to call which returns a bool
+
+            .. note::
+
+                If you wish to use arguments in you functions,
+                pass an instance of :class:`functools.partial`
+        interval: float
+            How long to sleep in-between each condition check.
+
+            Defaults to 5 seconds.
+        """
+        if asyncio.iscoroutinefunction(condition):
+            wrapped_condition = condition
+        elif callable(condition) or isinstance(condition, functools.partial):
+
+            async def wrapped_condition():
+                return condition()
+
+        else:
+
+            async def wrapped_condition():
+                return condition
+
+        remaining_seconds = seconds
+        while remaining_seconds > 0:
+
+            remaining_seconds -= interval
+            await asyncio.sleep(interval)
+
+            if await wrapped_condition():
+                return
