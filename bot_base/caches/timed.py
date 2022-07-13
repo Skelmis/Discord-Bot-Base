@@ -25,6 +25,10 @@ class TimedCache(Cache):
         else:
             return True
 
+    def __len__(self):
+        self.force_clean()
+        return len(self.cache.keys())
+
     def add_entry(
         self, key: Any, value: Any, *, ttl: timedelta = None, override: bool = False
     ) -> None:
