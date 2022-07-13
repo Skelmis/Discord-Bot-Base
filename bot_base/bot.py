@@ -368,7 +368,6 @@ class BotBase(commands.Bot):
         self,
         seconds: float,
         condition: Union[
-            bool,
             functools.partial,
             Callable[[Any], bool],
             Callable[[Any], Coroutine[Any, Any, bool]],
@@ -384,7 +383,6 @@ class BotBase(commands.Bot):
             How long to sleep for up to
         condition
             Pass either:
-            - A reference to a variable you can change later
             - A sync function to call which returns a bool
             - An async function to call which returns a bool
 
@@ -406,8 +404,7 @@ class BotBase(commands.Bot):
 
         else:
 
-            async def wrapped_condition():
-                return condition
+            raise TypeError("Unknown input argument")
 
         remaining_seconds = seconds
         while remaining_seconds > 0:
