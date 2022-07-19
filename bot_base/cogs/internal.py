@@ -25,7 +25,7 @@ class Internal(commands.Cog):
             return False
 
     @commands.Cog.listener()
-    async def on_ready(self):
+    async def on_initial_ready(self):
         log.info(f"{self.__class__.__name__}: Ready")
 
     @commands.group(invoke_without_command=True)
