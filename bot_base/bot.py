@@ -112,6 +112,7 @@ class BotBase(commands.Bot):
             await self.blacklist.initialize()
 
         if not self._has_dispatched_initial_ready:
+            # TODO Document this
             self.dispatch("initial_ready")
             self._has_dispatched_initial_ready = True
 
