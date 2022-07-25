@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import timedelta, datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from bot_base.caches import Entry
 from bot_base.caches.abc import Cache
@@ -11,7 +11,8 @@ from bot_base.exceptions import NonExistentEntry, ExistingEntry
 class TimedCache(Cache):
     __slots__ = ("cache",)
 
-    def __init__(self):
+    def __init__(self, *, global_ttl: Optional[timedelta] = None):
+        self.global_ttl: Optional[timedelta] = global_ttl
         self.cache: Dict[Any, Entry] = {}
 
     def __contains__(self, item: Any) -> bool:
@@ -30,12 +31,18 @@ class TimedCache(Cache):
         return len(self.cache.keys())
 
     def add_entry(
-        self, key: Any, value: Any, *, ttl: timedelta = None, override: bool = False
+        self,
+        key: Any,
+        value: Any,
+        *,
+        ttl: timedelta = None,
+        override: bool = False,
     ) -> None:
         if key in self and not override:
             raise ExistingEntry
 
-        if ttl:
+        if ttl or self.global_ttl:
+            ttl = ttl or self.global_ttl
             self.cache[key] = Entry(value=value, expiry_time=(datetime.now() + ttl))
         else:
             self.cache[key] = Entry(value=value)
