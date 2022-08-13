@@ -44,6 +44,22 @@ CONVERTER_MAPPING[nextcord.TextChannel] = WrappedChannel
 
 
 class BotBase(commands.Bot):
+    """
+    Attributes
+    ----------
+    command_prefix: str
+        Your bots command prefix
+    leave_db: bool
+        If ``True``, don't create a database instance.
+
+        Defaults to ``False``
+    do_command_stats: bool = True,
+    mongo_url: Optional[str] = None,
+    load_builtin_commands: bool = False,
+    mongo_database_name: Optional[str] = None,
+
+    """
+
     def __init__(
         self,
         *args,
@@ -96,14 +112,22 @@ class BotBase(commands.Bot):
 
     @property
     def uptime(self) -> datetime.datetime:
+        """Returns when the bot was initialized."""
         return self._uptime
 
     def get_uptime(self) -> str:
+        """Returns a human readable string for the bots uptime."""
         return humanize.precisedelta(
             self.uptime - datetime.datetime.now(tz=datetime.timezone.utc)
         )
 
     def get_bot_uptime(self) -> str:
+        """Returns a human readable string for the bots uptime.
+
+        Notes
+        -----
+        Deprecated.
+        """
         log.warning("This method is deprecated, use get_uptime instead")
         return self.get_uptime()
 
@@ -179,6 +203,10 @@ class BotBase(commands.Bot):
         return prefix
 
     async def on_command_error(self, ctx: BotContext, error: DiscordException) -> None:
+        """Generic error handling for common errors.
+
+        Also logs statistics if enabled.
+        """
         error = getattr(error, "original", error)
 
         if isinstance(error, commands.NoPrivateMessage):
@@ -222,6 +250,7 @@ class BotBase(commands.Bot):
         raise error
 
     async def on_command_completion(self, ctx: BotContext) -> None:
+        """Logs all commands as stats if `do_command_stats` is enabled."""
         if ctx.command.qualified_name == "logout":
             return
 
@@ -247,11 +276,13 @@ class BotBase(commands.Bot):
         log.debug(f"Command executed: `{ctx.command.qualified_name}`")
 
     async def on_guild_join(self, guild: nextcord.Guild) -> None:
+        """Leaves blacklisted guilds automatically."""
         if self.blacklist and guild.id in self.blacklist.guilds:
             log.info("Leaving blacklisted Guild(id=%s)", guild.id)
             await guild.leave()
 
     async def process_commands(self, message: nextcord.Message) -> None:
+        """Ignores commands from blacklisted users and guilds."""
         ctx = await self.get_context(message, cls=BotContext)
 
         if self.blacklist and ctx.author.id in self.blacklist.users:
@@ -276,6 +307,7 @@ class BotBase(commands.Bot):
         await self.invoke(ctx)
 
     async def on_message(self, message: nextcord.Message) -> None:
+        """Ignores messages from bots."""
         if message.author.bot:
             log.debug("Ignoring a message from a bot.")
             return
@@ -368,10 +400,11 @@ class BotBase(commands.Bot):
     def cancellable_wait_for(
         self, event: str, *, check=None, timeout: int = None
     ) -> CancellableWaitFor:
+        """Refer to :py:class:`CancellableWaitFor`"""
         return CancellableWaitFor(self, event=event, check=check, timeout=timeout)
 
+    @staticmethod
     async def sleep_with_condition(
-        self,
         seconds: float,
         condition: Union[
             functools.partial,

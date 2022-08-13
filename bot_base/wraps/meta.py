@@ -71,17 +71,17 @@ class Meta:
         author_id=None,
     ):
         """An interactive reaction confirmation dialog.
+
         Parameters
-        -----------
-        message: str
+        ----------
+        message : str
             The message to show along with the prompt.
-        timeout: float
+        timeout : float
             How long to wait before returning.
-        delete_after: bool
+        delete_after : bool
             Whether to delete the confirmation message after we're done.
-        author_id: Optional[int]
-            The member who should respond to the prompt. Defaults to the author of the
-            Context's message.
+        author_id : Optional[int]
+            The member who should respond to the prompt. Defaults to the author of the Context's message.
 
         Returns
         --------

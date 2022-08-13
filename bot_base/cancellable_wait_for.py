@@ -12,6 +12,7 @@ if TYPE_CHECKING:
 
 class CancellableWaitFor:
     def __init__(self, bot: BotBase, *, event, check=None, timeout=None):
+        """Test"""
         self.bot: BotBase = bot
 
         self._event = event
