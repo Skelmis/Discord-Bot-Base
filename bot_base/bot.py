@@ -108,7 +108,6 @@ class BotBase(commands.Bot):
                 self.get_wrapped_message(after),
             )
         }
-        self._has_dispatched_initial_ready: bool = False
 
     @property
     def uptime(self) -> datetime.datetime:
@@ -134,11 +133,6 @@ class BotBase(commands.Bot):
     async def on_ready(self) -> None:
         if self.blacklist:
             await self.blacklist.initialize()
-
-        if not self._has_dispatched_initial_ready:
-            # TODO Document this
-            self.dispatch("initial_ready")
-            self._has_dispatched_initial_ready = True
 
     async def get_command_prefix(
         self, bot: "BotBase", message: nextcord.Message
