@@ -23,22 +23,22 @@ class MongoManager:
     def typed_lookup(self, attr: str) -> Document:
         return getattr(self, attr)
 
-    def __getattr__(self, item) -> Document:
-        """
-        Parameters
-        ----------
-        item : str
-            Denotes the 'table' to return
-
-        Returns
-        -------
-        Document
-            A Document made for said item
-        """
-        doc: Document = Document(self.db, item)
-        setattr(self, item, doc)
-
-        return doc
+    # def __getattr__(self, item) -> Document:
+    #     """
+    #     Parameters
+    #     ----------
+    #     item : str
+    #         Denotes the 'table' to return
+    #
+    #     Returns
+    #     -------
+    #     Document
+    #         A Document made for said item
+    #     """
+    #     doc: Document = Document(self.db, item)
+    #     setattr(self, item, doc)
+    #
+    #     return doc
 
     def get_current_documents(self) -> List[Document]:
         class_vars = vars(self)
