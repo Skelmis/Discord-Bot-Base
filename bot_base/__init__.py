@@ -7,7 +7,7 @@ from .bot import BotBase
 from .context import BotContext
 from .cog import Cog
 
-__version__ = "1.7.0"
+__version__ = "1.7.1"
 
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
@@ -15,7 +15,7 @@ VersionInfo = namedtuple("VersionInfo", "major minor micro releaselevel serial")
 version_info = VersionInfo(
     major=1,
     minor=7,
-    micro=0,
+    micro=1,
     releaselevel="production",
     serial=0,
 )

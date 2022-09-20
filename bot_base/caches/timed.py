@@ -16,7 +16,7 @@ class TimedCache(Cache, Generic[KT, VT]):
         self,
         *,
         global_ttl: Optional[timedelta] = None,
-        lazy_eviction: bool = False,
+        lazy_eviction: bool = True,
     ):
         """
         Parameters
