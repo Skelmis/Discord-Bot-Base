@@ -8,7 +8,7 @@ This supports Nextcord and Disnake.
 
 [https://pypi.org/project/Bot-Base/](https://pypi.org/project/Bot-Base/)
 
-You can find documentation for this project [here](https://cheatsheet.koldfusion.xyz?q=bot_base) 
+Documentation no longer exists and this project is no longer actively developed. It is still actively used though
 
 Basic embed:
 
